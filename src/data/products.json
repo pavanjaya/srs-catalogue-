@@ -1,0 +1,66 @@
+[
+  {
+    "slug": "kshti",
+    "name": "KSH:ति (KSH:TI)",
+    "category": "Collectables",
+    "shortDescription": "A form shaped through instinctive dialogue between texture, light and memory.",
+    "image": "/images/kshti.svg",
+    "pdf": "/pdfs/kshti.pdf"
+  },
+  {
+    "slug": "anuvrati",
+    "name": "ANU:VRATI",
+    "category": "Collectables",
+    "shortDescription": "A quiet expression of atmosphere and soul, cast in bronze.",
+    "image": "/images/anuvrati.svg",
+    "pdf": "/pdfs/anuvrati.pdf"
+  },
+  {
+    "slug": "stingray",
+    "name": "STING:RAY",
+    "category": "Collectables",
+    "shortDescription": "Fluid form inspired by motion beneath the surface.",
+    "image": "/images/stingray.svg",
+    "pdf": "/pdfs/stingray.pdf"
+  },
+  {
+    "slug": "babiya",
+    "name": "BA:बिया (BA:BIYA)",
+    "category": "Collectables",
+    "shortDescription": "Craft and atmosphere rendered as a living, tactile presence.",
+    "image": "/images/babiya.svg",
+    "pdf": "/pdfs/babiya.pdf"
+  },
+  {
+    "slug": "aaseem",
+    "name": "असीम (AASEEM)",
+    "category": "Collectables",
+    "shortDescription": "A piece meant to be lived with, not merely displayed.",
+    "image": "/images/aaseem.svg",
+    "pdf": "/pdfs/aaseem.pdf"
+  },
+  {
+    "slug": "pravah",
+    "name": "PRA:VAH",
+    "category": "Collectables",
+    "shortDescription": "Movement and stillness held in a single silhouette.",
+    "image": "/images/pravah.svg",
+    "pdf": "/pdfs/pravah.pdf"
+  },
+  {
+    "slug": "vaayu-series",
+    "name": "VAAYU Series",
+    "category": "Shop by Series",
+    "shortDescription": "A series exploring air, lightness and negative space.",
+    "image": "/images/vaayu-series.svg",
+    "pdf": "/pdfs/vaayu-series.pdf"
+  },
+  {
+    "slug": "agni-story",
+    "name": "AGNI Story",
+    "category": "Shop by Stories",
+    "shortDescription": "A narrative collection built around fire, warmth and transformation.",
+    "image": "/images/agni-story.svg",
+    "pdf": "/pdfs/agni-story.pdf"
+  }
+]

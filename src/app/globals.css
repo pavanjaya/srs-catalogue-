@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  /* SRS foundational palette — see brand graphic guidelines */
+  --ink: #1e1e1e; /* Carbon Black */
+  --paper: #e4ded7; /* Bone White */
+  --paper-2: #dcd5cb;
+  --accent: #ffad21; /* Amber — used sparingly, interactive/decorative only */
+  --ash: #646468; /* Ash Grey */
+  --line: #cdc8c3;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-annapurna), Georgia, "Times New Roman", serif;
+}
+
+.font-sans-ui {
+  font-family: var(--font-duru), ui-sans-serif, system-ui, sans-serif;
+}
