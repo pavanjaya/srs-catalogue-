@@ -22,14 +22,23 @@ export default function AdminPage() {
             unoptimized
             className="h-10 w-auto sm:h-12"
           />
-          <form action={logout}>
-            <button
-              type="submit"
-              className="font-sans-ui text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]"
+          <div className="font-sans-ui flex items-center gap-5 text-sm">
+            <Link
+              href="/catalogues"
+              target="_blank"
+              className="text-[var(--ink)]/60 hover:text-[var(--ink)]"
             >
-              Log out
-            </button>
-          </form>
+              View public homepage ↗
+            </Link>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="text-[var(--ink)]/60 hover:text-[var(--ink)]"
+              >
+                Log out
+              </button>
+            </form>
+          </div>
         </div>
         <p className="font-sans-ui mb-2 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
