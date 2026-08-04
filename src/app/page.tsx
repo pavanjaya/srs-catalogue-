@@ -10,9 +10,30 @@ export default function AdminPage() {
   const pin = process.env.SITE_PASSWORD;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
-      <header className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
+    <>
+      <div className="font-sans-ui sticky top-0 z-40 flex items-center justify-between bg-[var(--ink)] px-6 py-3 text-sm text-white">
+        <span className="flex items-center gap-2 tracking-[0.15em] uppercase">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+          Admin Mode
+        </span>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/catalogues"
+            target="_blank"
+            className="text-white/70 hover:text-white"
+          >
+            View public homepage ↗
+          </Link>
+          <form action={logout}>
+            <button type="submit" className="text-white/70 hover:text-white">
+              Log out
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
+        <header className="mb-12">
           <Image
             src="/brand/srs-logo.png"
             alt={studio.name}
@@ -20,35 +41,13 @@ export default function AdminPage() {
             height={366}
             priority
             unoptimized
-            className="h-10 w-auto sm:h-12"
+            className="mb-6 h-10 w-auto sm:h-12"
           />
-          <div className="font-sans-ui flex items-center gap-5 text-sm">
-            <Link
-              href="/catalogues"
-              target="_blank"
-              className="text-[var(--ink)]/60 hover:text-[var(--ink)]"
-            >
-              View public homepage ↗
-            </Link>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="text-[var(--ink)]/60 hover:text-[var(--ink)]"
-              >
-                Log out
-              </button>
-            </form>
-          </div>
-        </div>
-        <p className="font-sans-ui mb-2 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          Admin
-        </p>
-        <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
-          Every piece carries its own story, and its own catalogue. Open one
-          below, or share its link — it arrives exactly as itself.
-        </p>
-      </header>
+          <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
+            Every piece carries its own story, and its own catalogue. Open one
+            below, or share its link — it arrives exactly as itself.
+          </p>
+        </header>
 
       {[...byCategory.entries()].map(([category, products]) => (
         <section key={category} className="mb-14">
@@ -77,7 +76,8 @@ export default function AdminPage() {
             ))}
           </div>
         </section>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
