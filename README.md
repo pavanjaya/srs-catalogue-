@@ -70,6 +70,24 @@ message style from the original templates). Shailesh can also just copy the
 page URL from the address bar and paste it into any chat — the WhatsApp
 preview card will still pick up the right name and photo automatically.
 
+## Password protection
+
+The whole site sits behind a single shared password (`src/proxy.ts` +
+`src/app/login/`) — visitors get redirected to `/login` until they enter it,
+then stay signed in via a cookie for 30 days. Social-media crawlers
+(WhatsApp, Facebook, etc.) are explicitly let through so per-product link
+previews keep working even though the site itself is gated — see the
+`CRAWLER_UA` allowlist in `src/proxy.ts` if that list ever needs updating.
+
+Set the password via an environment variable — never hardcode it:
+
+```
+SITE_PASSWORD=choose-a-real-password
+```
+
+Locally, put that in `.env.local` (already gitignored). On Vercel, add it
+under Project Settings → Environment Variables before your first deploy.
+
 ## Local development
 
 ```bash
@@ -87,17 +105,20 @@ vercel            # first deploy, follow prompts
 vercel --prod     # subsequent production deploys
 ```
 
-**Important — set the site URL after your first deploy.** WhatsApp/Facebook
-previews need an *absolute* image URL. In the Vercel project settings, add
-an environment variable:
+**Important — set two environment variables in Vercel before/after your
+first deploy** (Project Settings → Environment Variables):
 
 ```
+SITE_PASSWORD=choose-a-real-password
 NEXT_PUBLIC_SITE_URL=https://your-deployed-domain.vercel.app
 ```
 
-then redeploy. Without it, preview images may resolve against the wrong
-host. If you later attach a custom domain (e.g.
-`catalogue.shaileshrajputstudio.com`), update this variable to match.
+`SITE_PASSWORD` gates the site (see above). `NEXT_PUBLIC_SITE_URL` is needed
+because WhatsApp/Facebook previews require an *absolute* image URL — without
+it, preview images may resolve against the wrong host. Redeploy after adding
+either variable. If you later attach a custom domain (e.g.
+`catalogue.shaileshrajputstudio.com`), update `NEXT_PUBLIC_SITE_URL` to
+match.
 
 ## Testing a WhatsApp preview
 
