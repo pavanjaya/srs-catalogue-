@@ -26,18 +26,22 @@ export default async function LoginPage({
           htmlFor="password"
           className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
         >
-          Enter Password
+          Enter PIN
         </label>
         <input
           id="password"
           type="password"
           name="password"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="one-time-code"
+          maxLength={6}
           autoFocus
-          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-center text-lg tracking-[0.5em] text-[var(--ink)] outline-none focus:border-[var(--ink)]"
         />
         {error && (
           <p className="font-sans-ui mb-4 text-sm text-red-800">
-            Incorrect password — please try again.
+            Incorrect PIN — please try again.
           </p>
         )}
         <button

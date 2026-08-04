@@ -83,7 +83,7 @@ export default async function CataloguePage({
           >
             View / Download Catalogue (PDF)
           </a>
-          <ShareButton productName={product.name} />
+          <ShareButton productName={product.name} pin={process.env.SITE_PASSWORD} />
         </div>
       </section>
 

@@ -1,9 +1,16 @@
 "use client";
 
-export function ShareButton({ productName }: { productName: string }) {
+export function ShareButton({
+  productName,
+  pin,
+}: {
+  productName: string;
+  pin?: string;
+}) {
   function handleShare() {
     const url = window.location.href;
-    const text = `Hi, here's the catalogue for ${productName} you asked about 👇\n${url}\nYou can also browse our other designs from the same page.`;
+    const pinLine = pin ? `\nAccess PIN: ${pin}` : "";
+    const text = `Hi, here's the catalogue for ${productName} you asked about 👇\n${url}${pinLine}\nYou can also browse our other designs from the same page.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
