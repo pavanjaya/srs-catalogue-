@@ -88,7 +88,7 @@ export default async function CataloguePage({
       <section>
         <div className="font-sans-ui mb-6 flex items-baseline justify-between">
           <h2 className="text-lg">Explore More From Our Collection</h2>
-          <Link href="/" className="text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
+          <Link href="/catalogues" className="text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
             View all catalogues →
           </Link>
         </div>

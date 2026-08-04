@@ -5,14 +5,19 @@ import { NextRequest, NextResponse } from "next/server";
 const CRAWLER_UA =
   /whatsapp|facebookexternalhit|twitterbot|linkedinbot|slackbot|telegrambot|discordbot|pinterest|redditbot/i;
 
+// Always reachable, regardless of session — login pages and static assets.
 const PUBLIC_PREFIXES = [
-  "/login",
-  "/admin/login",
+  "/login", // admin login (root-level)
+  "/catalogues/login", // client PIN login
   "/images/",
   "/brand/",
   "/fonts/",
   "/favicon",
 ];
+
+// Client-facing routes: gated by the PIN (SITE_PASSWORD), or by an admin
+// session (an admin can preview everything a client sees).
+const CLIENT_PREFIXES = ["/catalogues", "/catalogue/", "/pdfs/"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,28 +32,26 @@ export function proxy(request: NextRequest) {
   }
 
   const adminSession = request.cookies.get("srs_admin_session")?.value;
-  const isAdmin =
-    !!adminSession && adminSession === process.env.ADMIN_PASSWORD;
-
-  // /admin/* requires the separate admin credential — the client PIN never
-  // grants access here, even though an admin session can browse everywhere.
-  if (pathname.startsWith("/admin")) {
-    if (isAdmin) return NextResponse.next();
-    const adminLoginUrl = new URL("/admin/login", request.url);
-    adminLoginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(adminLoginUrl);
-  }
+  const isAdmin = !!adminSession && adminSession === process.env.ADMIN_PASSWORD;
 
   if (isAdmin) return NextResponse.next();
 
-  const session = request.cookies.get("srs_session")?.value;
-  if (session && session === process.env.SITE_PASSWORD) {
-    return NextResponse.next();
+  const isClientPath = CLIENT_PREFIXES.some((p) => pathname.startsWith(p));
+
+  if (isClientPath) {
+    const session = request.cookies.get("srs_session")?.value;
+    if (session && session === process.env.SITE_PASSWORD) {
+      return NextResponse.next();
+    }
+    const loginUrl = new URL("/catalogues/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("next", pathname);
-  return NextResponse.redirect(loginUrl);
+  // Everything else — including the root "/" — is admin-only.
+  const adminLoginUrl = new URL("/login", request.url);
+  adminLoginUrl.searchParams.set("next", pathname);
+  return NextResponse.redirect(adminLoginUrl);
 }
 
 export const config = {

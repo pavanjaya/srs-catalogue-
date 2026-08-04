@@ -18,9 +18,9 @@ plugging in all 150 real catalogues.
 - `src/app/catalogue/[slug]/page.tsx` — the shareable product page. It reads
   the matching entry from `products.json` and builds the WhatsApp/Facebook
   preview tags (title + photo) specifically for that product.
-- `src/app/page.tsx` — the homepage, listing every catalogue grouped by
-  category. Useful for Shailesh to find and copy a product's link, and as the
-  "browse everything" destination.
+- `src/app/catalogues/page.tsx` — the public "browse everything" homepage,
+  listing every catalogue grouped by category. This is what a client sees,
+  not `/` — see the URL structure section below.
 - `public/images/` and `public/pdfs/` — the actual photo and PDF files,
   named to match each product's `slug`.
 
@@ -62,28 +62,37 @@ later needs Shailesh to upload new products himself through a web form
 (no file editing at all), that's a bigger upgrade — a small admin panel with
 a database — and worth a separate conversation when/if that need shows up.
 
-## Two views: public (clients) vs. admin (Shailesh)
+## URL structure: admin owns the root, public is under /catalogues
 
-- **Public** (`/`, `/catalogue/[slug]`) — what a client sees after entering
-  the PIN. Just the catalogue photo, description, and a PDF button. No way
-  to generate or re-share a link from here.
-- **Admin** (`/admin`) — a separate, separately-password-protected area for
-  composing and sending shares. Lists every product; each has a **Share**
-  button that opens a popup with an *editable* pre-filled WhatsApp message
-  (product link + PIN + the default greeting). Edit the message however you
-  like, then **Send via WhatsApp** opens it addressed to whoever you pick.
+The bare domain (`/`) is **admin-only** — reserved for Shailesh, not clients.
+Public/client-facing content lives under `/catalogues`:
+
+- **`/`** — admin dashboard (own password). Lists every product with a
+  **Share** control that opens a popup with an *editable* pre-filled
+  WhatsApp message (product link + PIN + greeting). Edit it, then **Send via
+  WhatsApp**. This is the primary URL you'd bookmark as Shailesh.
+- **`/login`** — admin login (root-level, since admin owns root).
+- **`/catalogues`** — the public "browse everything" homepage, what a client
+  sees. Just photos, descriptions, and PDF buttons — no way to generate or
+  re-share a link from here.
+- **`/catalogues/login`** — client PIN entry.
+- **`/catalogue/[slug]`** — the actual shareable per-product page (singular,
+  unchanged path — this is what WhatsApp links point to).
 
 This split exists so a client who has the PIN can view catalogues but can't
 also generate/re-share links with the PIN embedded — only someone with the
-separate admin password can do that composing step.
+separate admin password can do that composing step. An admin session can
+still browse everything under `/catalogues` too (to preview what a client
+sees) — the client PIN, however, cannot reach `/` or `/login` (admin).
 
 ## Password protection (two separate credentials)
 
 - `SITE_PASSWORD` — the client-facing PIN (recommended: numeric, e.g. 6
-  digits, easy to type on a phone). Gates `/`, `/catalogue/*`, and the PDFs.
-- `ADMIN_PASSWORD` — a separate, stronger password for `/admin`. The client
-  PIN does **not** grant access to `/admin`; an admin session, however, can
-  browse the public pages too (so Shailesh can preview what a client sees).
+  digits, easy to type on a phone). Gates `/catalogues`, `/catalogue/*`, and
+  the PDFs.
+- `ADMIN_PASSWORD` — a separate, stronger password for `/` (the admin
+  dashboard). The client PIN does **not** grant access to `/`; an admin
+  session, however, can browse the public `/catalogues` pages too.
 
 Both live in `src/proxy.ts` (`ADMIN_PASSWORD` cookie: `srs_admin_session`,
 `SITE_PASSWORD` cookie: `srs_session`) — social-media crawlers (WhatsApp,

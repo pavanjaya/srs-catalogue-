@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { studio } from "@/lib/studio";
-import { login } from "./actions";
+import { adminLogin } from "./actions";
 
-export default async function LoginPage({
+export default async function AdminLoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ next?: string; error?: string }>;
@@ -20,28 +20,27 @@ export default async function LoginPage({
         priority
         className="mb-10 h-10 w-auto"
       />
-      <form action={login} className="w-full">
+      <p className="font-sans-ui mb-6 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+        Admin
+      </p>
+      <form action={adminLogin} className="w-full">
         <input type="hidden" name="next" value={next} />
         <label
           htmlFor="password"
           className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
         >
-          Enter PIN
+          Admin Password
         </label>
         <input
           id="password"
           type="password"
           name="password"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="one-time-code"
-          maxLength={6}
           autoFocus
-          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-center text-lg tracking-[0.5em] text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
         />
         {error && (
           <p className="font-sans-ui mb-4 text-sm text-red-800">
-            Incorrect PIN — please try again.
+            Incorrect password — please try again.
           </p>
         )}
         <button

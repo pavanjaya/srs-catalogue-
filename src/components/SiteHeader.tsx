@@ -5,7 +5,7 @@ import { studio } from "@/lib/studio";
 export function SiteHeader() {
   return (
     <header className="font-sans-ui mb-10 flex items-center justify-between">
-      <Link href="/" className="block">
+      <Link href="/catalogues" className="block">
         <Image
           src="/brand/srs-logo.png"
           alt={studio.name}

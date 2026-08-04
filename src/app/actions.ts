@@ -6,5 +6,5 @@ import { redirect } from "next/navigation";
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete("srs_admin_session");
-  redirect("/admin/login");
+  redirect("/login");
 }
