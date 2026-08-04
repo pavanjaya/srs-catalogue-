@@ -33,7 +33,7 @@ export function ShareComposer({
     <>
       <button
         onClick={handleOpen}
-        className="font-sans-ui rounded-full border border-[var(--line)] bg-white px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-[var(--accent)]"
+        className="font-sans-ui shrink-0 text-xs text-[var(--ink)]/60 underline-offset-2 hover:text-[var(--ink)] hover:underline"
       >
         Share
       </button>
