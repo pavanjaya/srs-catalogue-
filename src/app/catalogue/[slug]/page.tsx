@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { getAllProducts, getOtherProducts, getProductBySlug } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ShareButton } from "./ShareButton";
 
 export async function generateStaticParams() {
   return getAllProducts().map((product) => ({ slug: product.slug }));
@@ -83,7 +82,6 @@ export default async function CataloguePage({
           >
             View / Download Catalogue (PDF)
           </a>
-          <ShareButton productName={product.name} pin={process.env.SITE_PASSWORD} />
         </div>
       </section>
 

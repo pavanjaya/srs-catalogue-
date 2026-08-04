@@ -62,30 +62,43 @@ later needs Shailesh to upload new products himself through a web form
 (no file editing at all), that's a bigger upgrade — a small admin panel with
 a database — and worth a separate conversation when/if that need shows up.
 
-## Sharing a catalogue on WhatsApp
+## Two views: public (clients) vs. admin (Shailesh)
 
-Every product page has a **Share on WhatsApp** button that pre-fills a
-message with that product's name and page link (using the short/direct
-message style from the original templates). Shailesh can also just copy the
-page URL from the address bar and paste it into any chat — the WhatsApp
-preview card will still pick up the right name and photo automatically.
+- **Public** (`/`, `/catalogue/[slug]`) — what a client sees after entering
+  the PIN. Just the catalogue photo, description, and a PDF button. No way
+  to generate or re-share a link from here.
+- **Admin** (`/admin`) — a separate, separately-password-protected area for
+  composing and sending shares. Lists every product; each has a **Share**
+  button that opens a popup with an *editable* pre-filled WhatsApp message
+  (product link + PIN + the default greeting). Edit the message however you
+  like, then **Send via WhatsApp** opens it addressed to whoever you pick.
 
-## Password protection
+This split exists so a client who has the PIN can view catalogues but can't
+also generate/re-share links with the PIN embedded — only someone with the
+separate admin password can do that composing step.
 
-The whole site sits behind a single shared password (`src/proxy.ts` +
-`src/app/login/`) — visitors get redirected to `/login` until they enter it,
-then stay signed in via a cookie for 30 days. Social-media crawlers
-(WhatsApp, Facebook, etc.) are explicitly let through so per-product link
-previews keep working even though the site itself is gated — see the
-`CRAWLER_UA` allowlist in `src/proxy.ts` if that list ever needs updating.
+## Password protection (two separate credentials)
 
-Set the password via an environment variable — never hardcode it:
+- `SITE_PASSWORD` — the client-facing PIN (recommended: numeric, e.g. 6
+  digits, easy to type on a phone). Gates `/`, `/catalogue/*`, and the PDFs.
+- `ADMIN_PASSWORD` — a separate, stronger password for `/admin`. The client
+  PIN does **not** grant access to `/admin`; an admin session, however, can
+  browse the public pages too (so Shailesh can preview what a client sees).
+
+Both live in `src/proxy.ts` (`ADMIN_PASSWORD` cookie: `srs_admin_session`,
+`SITE_PASSWORD` cookie: `srs_session`) — social-media crawlers (WhatsApp,
+Facebook, etc.) are explicitly let through both gates so per-product link
+previews keep working. See the `CRAWLER_UA` allowlist in `src/proxy.ts` if
+that list ever needs updating.
+
+Set both via environment variables — never hardcode either:
 
 ```
-SITE_PASSWORD=choose-a-real-password
+SITE_PASSWORD=choose-a-client-pin
+ADMIN_PASSWORD=choose-a-stronger-admin-password
 ```
 
-Locally, put that in `.env.local` (already gitignored). On Vercel, add it
+Locally, put those in `.env.local` (already gitignored). On Vercel, add them
 under Project Settings → Environment Variables before your first deploy.
 
 ## Local development
@@ -105,20 +118,21 @@ vercel            # first deploy, follow prompts
 vercel --prod     # subsequent production deploys
 ```
 
-**Important — set two environment variables in Vercel before/after your
+**Important — set these environment variables in Vercel before/after your
 first deploy** (Project Settings → Environment Variables):
 
 ```
-SITE_PASSWORD=choose-a-real-password
+SITE_PASSWORD=choose-a-client-pin
+ADMIN_PASSWORD=choose-a-stronger-admin-password
 NEXT_PUBLIC_SITE_URL=https://your-deployed-domain.vercel.app
 ```
 
-`SITE_PASSWORD` gates the site (see above). `NEXT_PUBLIC_SITE_URL` is needed
-because WhatsApp/Facebook previews require an *absolute* image URL — without
-it, preview images may resolve against the wrong host. Redeploy after adding
-either variable. If you later attach a custom domain (e.g.
-`catalogue.shaileshrajputstudio.com`), update `NEXT_PUBLIC_SITE_URL` to
-match.
+`SITE_PASSWORD`/`ADMIN_PASSWORD` gate the site (see above).
+`NEXT_PUBLIC_SITE_URL` is needed because WhatsApp/Facebook previews require
+an *absolute* image URL — without it, preview images may resolve against the
+wrong host. Redeploy after adding any of these. If you later attach a custom
+domain (e.g. `catalogue.shaileshrajputstudio.com`), update
+`NEXT_PUBLIC_SITE_URL` to match.
 
 ## Testing a WhatsApp preview
 

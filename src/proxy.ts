@@ -5,7 +5,14 @@ import { NextRequest, NextResponse } from "next/server";
 const CRAWLER_UA =
   /whatsapp|facebookexternalhit|twitterbot|linkedinbot|slackbot|telegrambot|discordbot|pinterest|redditbot/i;
 
-const PUBLIC_PREFIXES = ["/login", "/images/", "/brand/", "/fonts/", "/favicon"];
+const PUBLIC_PREFIXES = [
+  "/login",
+  "/admin/login",
+  "/images/",
+  "/brand/",
+  "/fonts/",
+  "/favicon",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -18,6 +25,21 @@ export function proxy(request: NextRequest) {
   if (CRAWLER_UA.test(userAgent)) {
     return NextResponse.next();
   }
+
+  const adminSession = request.cookies.get("srs_admin_session")?.value;
+  const isAdmin =
+    !!adminSession && adminSession === process.env.ADMIN_PASSWORD;
+
+  // /admin/* requires the separate admin credential — the client PIN never
+  // grants access here, even though an admin session can browse everywhere.
+  if (pathname.startsWith("/admin")) {
+    if (isAdmin) return NextResponse.next();
+    const adminLoginUrl = new URL("/admin/login", request.url);
+    adminLoginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(adminLoginUrl);
+  }
+
+  if (isAdmin) return NextResponse.next();
 
   const session = request.cookies.get("srs_session")?.value;
   if (session && session === process.env.SITE_PASSWORD) {
