@@ -50,7 +50,15 @@ export default function AdminPage() {
 
       {[...byCategory.entries()].map(([category, products]) => (
         <section key={category} className="mb-14">
-          <h2 className="font-sans-ui mb-6 text-lg">{category}</h2>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <h2 className="font-sans-ui text-lg">{category}</h2>
+            <ShareComposer
+              triggerLabel="Share category"
+              dialogTitle={category}
+              path={`/catalogues?category=${encodeURIComponent(category)}`}
+              messageTemplate={`Hi, here's our full ${category} range 👇\n{url}\nBrowse the collection — open any piece for its own catalogue.`}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {products.map((product) => (
               <div key={product.slug} className="group">
@@ -69,7 +77,11 @@ export default function AdminPage() {
                   <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">
                     {product.name}
                   </p>
-                  <ShareComposer product={product} />
+                  <ShareComposer
+                    dialogTitle={product.name}
+                    path={`/catalogue/${product.slug}`}
+                    messageTemplate={`Hi, here's the catalogue for ${product.name} you asked about 👇\n{url}\nYou can also browse our other designs from the same page.`}
+                  />
                 </div>
               </div>
             ))}

@@ -1,19 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import type { Product } from "@/lib/products";
 
-function defaultMessage(product: Product, url: string) {
-  return `Hi, here's the catalogue for ${product.name} you asked about 👇\n${url}\nYou can also browse our other designs from the same page.`;
-}
-
-export function ShareComposer({ product }: { product: Product }) {
+// Reusable "compose & send" popup — used for sharing a single product's
+// link and for sharing a whole category's link. `messageTemplate` may
+// contain a literal "{url}" placeholder, filled in client-side (only the
+// browser knows its own origin, so the full URL can't be built server-side
+// in the admin page and passed down as a prop).
+export function ShareComposer({
+  triggerLabel = "Share",
+  dialogTitle,
+  path,
+  messageTemplate,
+}: {
+  triggerLabel?: string;
+  dialogTitle: string;
+  path: string;
+  messageTemplate: string;
+}) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
 
   function handleOpen() {
-    const url = `${window.location.origin}/catalogue/${product.slug}`;
-    setMessage(defaultMessage(product, url));
+    const url = `${window.location.origin}${path}`;
+    setMessage(messageTemplate.replace("{url}", url));
     setOpen(true);
   }
 
@@ -28,7 +38,7 @@ export function ShareComposer({ product }: { product: Product }) {
         onClick={handleOpen}
         className="font-sans-ui shrink-0 text-xs text-[var(--ink)]/60 underline-offset-2 hover:text-[var(--ink)] hover:underline"
       >
-        Share
+        {triggerLabel}
       </button>
 
       {open && (
@@ -43,7 +53,7 @@ export function ShareComposer({ product }: { product: Product }) {
             <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
               Share on WhatsApp
             </p>
-            <h2 className="mb-4 text-xl">{product.name}</h2>
+            <h2 className="mb-4 text-xl">{dialogTitle}</h2>
 
             <label
               htmlFor="share-message"

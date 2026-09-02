@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { Product, ProductCategory } from "@/lib/products";
 
@@ -15,7 +16,15 @@ export function CategoryBrowser({
   linkPrefix?: string;
 }) {
   const firstNonEmpty = categories.find((c) => (byCategory.get(c) ?? []).length > 0) ?? categories[0];
-  const [active, setActive] = useState<ProductCategory>(firstNonEmpty);
+
+  // Supports a direct link into one category — /catalogues?category=Wall+Sconces
+  // — so the admin panel's "Share category" button has somewhere to point.
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("category");
+  const initial =
+    (requested && categories.find((c) => c === requested)) || firstNonEmpty;
+
+  const [active, setActive] = useState<ProductCategory>(initial);
   const products = byCategory.get(active) ?? [];
 
   return (

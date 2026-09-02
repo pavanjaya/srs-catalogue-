@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
@@ -38,7 +39,9 @@ export default function CataloguesPage() {
         </a>
       </header>
 
-      <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
+      <Suspense fallback={null}>
+        <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
+      </Suspense>
 
       <footer className="font-sans-ui mt-14 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--line)] pt-6 text-sm text-[var(--ink)]/60">
         <a href={`tel:${studio.phone}`} className="hover:text-[var(--ink)]">
