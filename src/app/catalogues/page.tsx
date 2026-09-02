@@ -1,14 +1,14 @@
 import Image from "next/image";
-import Link from "next/link";
-import { getProductsByCategory } from "@/lib/products";
+import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
+import { CategoryBrowser } from "@/components/CategoryBrowser";
 
 export default function CataloguesPage() {
   const byCategory = getProductsByCategory();
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
-      <header className="mb-12">
+      <header className="mb-10">
         <Image
           src="/brand/srs-logo.png"
           alt={studio.name}
@@ -24,8 +24,9 @@ export default function CataloguesPage() {
           Catalogue Library
         </p>
         <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
-          Every piece carries its own story, and its own catalogue. Open one
-          below, or share its link — it arrives exactly as itself.
+          Every piece carries its own story, and its own catalogue. Browse by
+          type below, open one, or share its link — it arrives exactly as
+          itself.
         </p>
         <a
           href={studio.website}
@@ -37,35 +38,9 @@ export default function CataloguesPage() {
         </a>
       </header>
 
-      {[...byCategory.entries()].map(([category, products]) => (
-        <section key={category} className="mb-14">
-          <h2 className="font-sans-ui mb-6 text-lg">{category}</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {products.map((product) => (
-              <Link
-                key={product.slug}
-                href={`/catalogue/${product.slug}`}
-                className="group block"
-              >
-                <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={400}
-                    height={400}
-                    className="h-auto w-full object-cover transition group-hover:opacity-80"
-                  />
-                </div>
-                <p className="font-sans-ui text-xs text-[var(--ink)]/80">
-                  {product.name}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ))}
+      <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
 
-      <footer className="font-sans-ui flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--line)] pt-6 text-sm text-[var(--ink)]/60">
+      <footer className="font-sans-ui mt-14 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--line)] pt-6 text-sm text-[var(--ink)]/60">
         <a href={`tel:${studio.phone}`} className="hover:text-[var(--ink)]">
           Call
         </a>

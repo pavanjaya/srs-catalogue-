@@ -50,7 +50,7 @@
   {
     "slug": "vaayu-series",
     "name": "VAAYU Series",
-    "category": "Shop by Series",
+    "category": "Collectables",
     "shortDescription": "A series exploring air, lightness and negative space.",
     "image": "/images/vaayu-series.svg",
     "pdf": "/pdfs/vaayu-series.pdf"
@@ -58,9 +58,99 @@
   {
     "slug": "agni-story",
     "name": "AGNI Story",
-    "category": "Shop by Stories",
+    "category": "Collectables",
     "shortDescription": "A narrative collection built around fire, warmth and transformation.",
     "image": "/images/agni-story.svg",
     "pdf": "/pdfs/agni-story.pdf"
+  },
+  {
+    "slug": "wall-sconces-coming-soon",
+    "name": "Coming Soon",
+    "category": "Wall Sconces",
+    "shortDescription": "A piece from the studio's Wall Sconces range — photography and details are being prepared.",
+    "image": "/images/wall-sconces-coming-soon.svg",
+    "pdf": "/pdfs/wall-sconces-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "wall-art-coming-soon",
+    "name": "Coming Soon",
+    "category": "Wall Art",
+    "shortDescription": "A piece from the studio's Wall Art range — photography and details are being prepared.",
+    "image": "/images/wall-art-coming-soon.svg",
+    "pdf": "/pdfs/wall-art-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "wall-clock-coming-soon",
+    "name": "Coming Soon",
+    "category": "Wall Clock",
+    "shortDescription": "A piece from the studio's Wall Clock range — photography and details are being prepared.",
+    "image": "/images/wall-clock-coming-soon.svg",
+    "pdf": "/pdfs/wall-clock-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "pendant-lights-coming-soon",
+    "name": "Coming Soon",
+    "category": "Pendant Lights",
+    "shortDescription": "A piece from the studio's Pendant Lights range — photography and details are being prepared.",
+    "image": "/images/pendant-lights-coming-soon.svg",
+    "pdf": "/pdfs/pendant-lights-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "ceiling-lights-coming-soon",
+    "name": "Coming Soon",
+    "category": "Ceiling Lights",
+    "shortDescription": "A piece from the studio's Ceiling Lights range — photography and details are being prepared.",
+    "image": "/images/ceiling-lights-coming-soon.svg",
+    "pdf": "/pdfs/ceiling-lights-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "table-lights-coming-soon",
+    "name": "Coming Soon",
+    "category": "Table Lights",
+    "shortDescription": "A piece from the studio's Table Lights range — photography and details are being prepared.",
+    "image": "/images/table-lights-coming-soon.svg",
+    "pdf": "/pdfs/table-lights-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "floor-lamps-coming-soon",
+    "name": "Coming Soon",
+    "category": "Floor Lamps",
+    "shortDescription": "A piece from the studio's Floor Lamps range — photography and details are being prepared.",
+    "image": "/images/floor-lamps-coming-soon.svg",
+    "pdf": "/pdfs/floor-lamps-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "accent-furniture-pieces-coming-soon",
+    "name": "Coming Soon",
+    "category": "Accent Furniture Pieces",
+    "shortDescription": "A piece from the studio's Accent Furniture Pieces range — photography and details are being prepared.",
+    "image": "/images/accent-furniture-pieces-coming-soon.svg",
+    "pdf": "/pdfs/accent-furniture-pieces-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "artisanal-pieces-coming-soon",
+    "name": "Coming Soon",
+    "category": "Artisanal Pieces",
+    "shortDescription": "A piece from the studio's Artisanal Pieces range — photography and details are being prepared.",
+    "image": "/images/artisanal-pieces-coming-soon.svg",
+    "pdf": "/pdfs/artisanal-pieces-coming-soon.pdf",
+    "placeholder": true
+  },
+  {
+    "slug": "mirror-coming-soon",
+    "name": "Coming Soon",
+    "category": "Mirror",
+    "shortDescription": "A piece from the studio's Mirror range — photography and details are being prepared.",
+    "image": "/images/mirror-coming-soon.svg",
+    "pdf": "/pdfs/mirror-coming-soon.pdf",
+    "placeholder": true
   }
 ]
