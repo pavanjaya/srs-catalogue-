@@ -7,7 +7,6 @@ import { logout } from "./actions";
 
 export default function AdminPage() {
   const byCategory = getProductsByCategory();
-  const pin = process.env.SITE_PASSWORD;
 
   return (
     <>
@@ -70,7 +69,7 @@ export default function AdminPage() {
                   <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">
                     {product.name}
                   </p>
-                  <ShareComposer product={product} pin={pin} />
+                  <ShareComposer product={product} />
                 </div>
               </div>
             ))}

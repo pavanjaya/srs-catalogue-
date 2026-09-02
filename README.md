@@ -69,45 +69,33 @@ Public/client-facing content lives under `/catalogues`:
 
 - **`/`** — admin dashboard (own password). Lists every product with a
   **Share** control that opens a popup with an *editable* pre-filled
-  WhatsApp message (product link + PIN + greeting). Edit it, then **Send via
+  WhatsApp message (product link + greeting). Edit it, then **Send via
   WhatsApp**. This is the primary URL you'd bookmark as Shailesh.
 - **`/login`** — admin login (root-level, since admin owns root).
 - **`/catalogues`** — the public "browse everything" homepage, what a client
-  sees. Just photos, descriptions, and PDF buttons — no way to generate or
-  re-share a link from here.
-- **`/catalogues/login`** — client PIN entry.
+  sees. Just photos, descriptions, and PDF buttons — open to anyone with the
+  link, no login step.
 - **`/catalogue/[slug]`** — the actual shareable per-product page (singular,
-  unchanged path — this is what WhatsApp links point to).
+  unchanged path — this is what WhatsApp links point to). Also open, no
+  login step.
 
-This split exists so a client who has the PIN can view catalogues but can't
-also generate/re-share links with the PIN embedded — only someone with the
-separate admin password can do that composing step. An admin session can
-still browse everything under `/catalogues` too (to preview what a client
-sees) — the client PIN, however, cannot reach `/` or `/login` (admin).
+Client-facing routes (`/catalogues`, `/catalogue/*`, the PDFs) are
+intentionally not password-gated — a client opening a shared link lands
+straight on the catalogue. Only the admin dashboard at `/` stays behind a
+password, since that's where links get generated/shared from.
 
-## Password protection (two separate credentials)
+## Password protection (admin only)
 
-- `SITE_PASSWORD` — the client-facing PIN (recommended: numeric, e.g. 6
-  digits, easy to type on a phone). Gates `/catalogues`, `/catalogue/*`, and
-  the PDFs.
-- `ADMIN_PASSWORD` — a separate, stronger password for `/` (the admin
-  dashboard). The client PIN does **not** grant access to `/`; an admin
-  session, however, can browse the public `/catalogues` pages too.
+- `ADMIN_PASSWORD` — gates `/` (the admin dashboard) only. Set it via
+  environment variable — never hardcode it.
 
-Both live in `src/proxy.ts` (`ADMIN_PASSWORD` cookie: `srs_admin_session`,
-`SITE_PASSWORD` cookie: `srs_session`) — social-media crawlers (WhatsApp,
-Facebook, etc.) are explicitly let through both gates so per-product link
-previews keep working. See the `CRAWLER_UA` allowlist in `src/proxy.ts` if
-that list ever needs updating.
-
-Set both via environment variables — never hardcode either:
+Lives in `src/proxy.ts` (cookie: `srs_admin_session`).
 
 ```
-SITE_PASSWORD=choose-a-client-pin
-ADMIN_PASSWORD=choose-a-stronger-admin-password
+ADMIN_PASSWORD=choose-a-strong-admin-password
 ```
 
-Locally, put those in `.env.local` (already gitignored). On Vercel, add them
+Locally, put that in `.env.local` (already gitignored). On Vercel, add it
 under Project Settings → Environment Variables before your first deploy.
 
 ## Local development
@@ -131,12 +119,11 @@ vercel --prod     # subsequent production deploys
 first deploy** (Project Settings → Environment Variables):
 
 ```
-SITE_PASSWORD=choose-a-client-pin
-ADMIN_PASSWORD=choose-a-stronger-admin-password
+ADMIN_PASSWORD=choose-a-strong-admin-password
 NEXT_PUBLIC_SITE_URL=https://your-deployed-domain.vercel.app
 ```
 
-`SITE_PASSWORD`/`ADMIN_PASSWORD` gate the site (see above).
+`ADMIN_PASSWORD` gates the admin dashboard (see above).
 `NEXT_PUBLIC_SITE_URL` is needed because WhatsApp/Facebook previews require
 an *absolute* image URL — without it, preview images may resolve against the
 wrong host. Redeploy after adding any of these. If you later attach a custom

@@ -3,24 +3,17 @@
 import { useState } from "react";
 import type { Product } from "@/lib/products";
 
-function defaultMessage(product: Product, url: string, pin?: string) {
-  const pinLine = pin ? `\nAccess PIN: ${pin}` : "";
-  return `Hi, here's the catalogue for ${product.name} you asked about 👇\n${url}${pinLine}\nYou can also browse our other designs from the same page.`;
+function defaultMessage(product: Product, url: string) {
+  return `Hi, here's the catalogue for ${product.name} you asked about 👇\n${url}\nYou can also browse our other designs from the same page.`;
 }
 
-export function ShareComposer({
-  product,
-  pin,
-}: {
-  product: Product;
-  pin?: string;
-}) {
+export function ShareComposer({ product }: { product: Product }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
 
   function handleOpen() {
     const url = `${window.location.origin}/catalogue/${product.slug}`;
-    setMessage(defaultMessage(product, url, pin));
+    setMessage(defaultMessage(product, url));
     setOpen(true);
   }
 
