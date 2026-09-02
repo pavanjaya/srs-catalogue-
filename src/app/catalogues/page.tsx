@@ -42,31 +42,6 @@ export default function CataloguesPage() {
       <Suspense fallback={null}>
         <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
       </Suspense>
-
-      <footer className="font-sans-ui mt-14 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--line)] pt-6 text-sm text-[var(--ink)]/60">
-        <a href={`tel:${studio.phone}`} className="hover:text-[var(--ink)]">
-          Call
-        </a>
-        <a
-          href={`https://wa.me/${studio.whatsapp}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-[var(--ink)]"
-        >
-          WhatsApp
-        </a>
-        <a href={`mailto:${studio.email}`} className="hover:text-[var(--ink)]">
-          Email
-        </a>
-        <a
-          href={studio.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-[var(--ink)]"
-        >
-          Instagram
-        </a>
-      </footer>
     </div>
   );
 }
