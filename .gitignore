@@ -8,3 +8,8 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 .env*
+*.tsbuildinfo
+
+# One-off deliverable files sent directly to the user, not part of the app
+/SRS-Logo.svg
+/SRS-Table-Lights-Brochure.pdf
