@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Always reachable, regardless of session — the admin login page and
 // static assets.
-const PUBLIC_PREFIXES = ["/login", "/images/", "/brand/", "/fonts/", "/favicon"];
+const PUBLIC_PREFIXES = ["/login", "/brand/", "/fonts/", "/favicon"];
 
-// Client-facing routes (the pages and PDFs a client link actually points
-// at) are intentionally open — no PIN. A client opening a shared link
-// should land straight on the catalogue, not a login screen. Only the
-// admin dashboard (root "/") stays behind ADMIN_PASSWORD.
-const CLIENT_PREFIXES = ["/catalogues", "/catalogue/", "/brochure/", "/pdfs/"];
+// Client-facing routes (a brochure link a client actually opens) are
+// intentionally open — no PIN. Only the admin dashboard (root "/") and
+// the brochure-upload API stay behind ADMIN_PASSWORD.
+const CLIENT_PREFIXES = ["/brochure/"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

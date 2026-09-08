@@ -21,11 +21,11 @@ export default async function AdminPage() {
         </span>
         <div className="flex items-center gap-5">
           <Link
-            href="/catalogues"
+            href={studio.website}
             target="_blank"
             className="text-white/70 hover:text-white"
           >
-            View public homepage ↗
+            Visit full website ↗
           </Link>
           <form action={logout}>
             <button type="submit" className="text-white/70 hover:text-white">
