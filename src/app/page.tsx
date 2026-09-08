@@ -2,11 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
+import { getCategoryBrochures } from "@/lib/brochures";
 import { AdminCategoryBrowser } from "@/components/AdminCategoryBrowser";
 import { logout } from "./actions";
 
-export default function AdminPage() {
+// Always fresh — the admin dashboard needs to show the current brochure
+// state immediately after an upload, not a stale cached snapshot.
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
   const byCategory = getProductsByCategory();
+  const brochures = await getCategoryBrochures(productCategories);
 
   return (
     <>
@@ -48,7 +54,7 @@ export default function AdminPage() {
           </p>
         </header>
 
-        <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} />
+        <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} brochures={brochures} />
       </div>
     </>
   );

@@ -10,9 +10,11 @@ import { ShareModal } from "@/components/ShareModal";
 export function AdminCategoryBrowser({
   categories,
   byCategory,
+  brochures = {},
 }: {
   categories: readonly ProductCategory[];
   byCategory: Map<ProductCategory, Product[]>;
+  brochures?: Partial<Record<ProductCategory, string>>;
 }) {
   const [openCategory, setOpenCategory] = useState<ProductCategory | null>(null);
 
@@ -23,9 +25,10 @@ export function AdminCategoryBrowser({
           const products = byCategory.get(category) ?? [];
           const cover = products[0];
           const count = products.filter((p) => !p.placeholder).length;
+          const hasBrochure = !!brochures[category];
           return (
             <button key={category} onClick={() => setOpenCategory(category)} className="group text-left">
-              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+              <div className="relative mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                 {cover ? (
                   <Image
                     src={cover.image}
@@ -36,6 +39,11 @@ export function AdminCategoryBrowser({
                   />
                 ) : (
                   <div className="aspect-square bg-[var(--paper-2)]" />
+                )}
+                {hasBrochure && (
+                  <span className="font-sans-ui absolute top-2 right-2 rounded-full bg-[var(--ink)] px-2 py-1 text-[10px] tracking-[0.1em] text-white uppercase">
+                    PDF
+                  </span>
                 )}
               </div>
               <p className="font-sans-ui text-sm text-[var(--ink)]">{category}</p>
@@ -51,6 +59,7 @@ export function AdminCategoryBrowser({
         <ShareModal
           category={openCategory}
           products={byCategory.get(openCategory) ?? []}
+          brochureUrl={brochures[openCategory]}
           onClose={() => setOpenCategory(null)}
         />
       )}

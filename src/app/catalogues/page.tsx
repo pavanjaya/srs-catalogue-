@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
+import { getCategoryBrochures } from "@/lib/brochures";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
 import { FloatingContact } from "@/components/FloatingContact";
 
@@ -11,6 +12,7 @@ export default async function CataloguesPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const byCategory = getProductsByCategory();
+  const brochures = await getCategoryBrochures(productCategories);
   // The category-hero view (CategoryBrowser, below) has its own eyebrow,
   // heading and description once a category is selected — showing this
   // generic intro above it as well just repeats "Catalogue Library" twice.
@@ -54,7 +56,12 @@ export default async function CataloguesPage({
       </header>
 
       <Suspense fallback={null}>
-        <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
+        <CategoryBrowser
+          categories={productCategories}
+          byCategory={byCategory}
+          brochures={brochures}
+          linkPrefix="/catalogue"
+        />
       </Suspense>
 
       <FloatingContact />

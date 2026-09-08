@@ -42,10 +42,12 @@ function CategoryTile({
 export function CategoryBrowser({
   categories,
   byCategory,
+  brochures = {},
   linkPrefix = "/catalogue",
 }: {
   categories: readonly ProductCategory[];
   byCategory: Map<ProductCategory, Product[]>;
+  brochures?: Partial<Record<ProductCategory, string>>;
   linkPrefix?: string;
 }) {
   // /catalogues?category=Wall+Sconces — how a shared category link (from the
@@ -90,6 +92,7 @@ export function CategoryBrowser({
   const realCount = heroProducts.filter((p) => !p.placeholder).length;
   const cover = heroProducts[0];
   const otherCategories = categories.filter((c) => c !== active);
+  const brochureUrl = brochures[active];
 
   return (
     <div>
@@ -102,7 +105,9 @@ export function CategoryBrowser({
         <p className="mb-8 max-w-xl text-[var(--ink)]/70">
           {realCount > 0
             ? `The full ${active} brochure — ${realCount} piece${realCount === 1 ? "" : "s"} from this range, each with its own catalogue page.`
-            : `The ${active} brochure is being put together — real pieces from this range will appear here soon.`}
+            : brochureUrl
+              ? `The full ${active} brochure — every piece from this range, in one PDF.`
+              : `The ${active} brochure is being put together — real pieces from this range will appear here soon.`}
         </p>
 
         {cover && (
@@ -115,6 +120,19 @@ export function CategoryBrowser({
               className="h-auto w-full object-cover"
               priority
             />
+          </div>
+        )}
+
+        {brochureUrl && (
+          <div className="font-sans-ui mb-8 flex flex-wrap gap-3">
+            <a
+              href={brochureUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+            >
+              View / Download Catalogue (PDF)
+            </a>
           </div>
         )}
 

@@ -21,6 +21,9 @@ export const productCategories = [
 
 export type ProductCategory = (typeof productCategories)[number];
 
+// Real, designed PDF brochures per category (cover, product pages, back
+// page) live in Vercel Blob storage, not here — see src/lib/brochures.ts.
+
 export type Product = {
   slug: string;
   name: string;
