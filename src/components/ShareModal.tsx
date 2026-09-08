@@ -5,10 +5,56 @@ import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
 import { deleteBrochure } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
 
+function CloseIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CopyIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m3 0-.8 12.1a2 2 0 0 1-2 1.9H8.8a2 2 0 0 1-2-1.9L6 7h12Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // The admin panel's share popup for one brochure — left pane previews the
 // actual PDF (the browser's own viewer, which includes page number /
 // navigation), right pane has the link, editable message, Send via
-// WhatsApp / Email, and Remove. Opens from clicking a card in
+// WhatsApp / Email, and Remove (with an in-modal confirm step, not the
+// browser's own confirm() dialog). Opens from clicking a card in
 // BrochureManager.
 export function ShareModal({
   brochure,
@@ -23,6 +69,7 @@ export function ShareModal({
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [isDeleting, startTransition] = useTransition();
   const urlInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,16 +80,18 @@ export function ShareModal({
       `Hi, here's the catalogue for ${brochure.title} 👇\n${fullUrl}\nTake a look — view or download anytime.`,
     );
     setCopied(false);
+    setConfirmingRemove(false);
   }, [brochure]);
 
-  // Close on Escape, for anyone driving this with a keyboard.
+  // Close on Escape — but not while the destructive confirm step is
+  // showing, so it can't be dismissed by accident mid-decision.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !confirmingRemove) onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, confirmingRemove]);
 
   async function copyUrl() {
     setCopyFailed(false);
@@ -84,8 +133,7 @@ export function ShareModal({
     );
   }
 
-  function remove() {
-    if (!window.confirm(`Remove "${brochure.title}"? This can't be undone.`)) return;
+  function confirmRemove() {
     startTransition(async () => {
       await deleteBrochure(buildBrochurePathname(brochure.id, brochure.title), brochure.id);
       onDeleted();
@@ -95,7 +143,7 @@ export function ShareModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8"
-      onClick={onClose}
+      onClick={confirmingRemove ? undefined : onClose}
     >
       <div
         className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl sm:flex-row"
@@ -108,17 +156,19 @@ export function ShareModal({
 
         {/* Right — link, message, send */}
         <div className="flex w-full flex-1 flex-col overflow-y-auto p-6 sm:w-1/2">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="font-sans-ui text-xs tracking-[0.2em] text-[var(--ash)] uppercase">Share</p>
-              <h2 className="text-xl text-[var(--ink)]">{brochure.title}</h2>
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+                Share
+              </p>
+              <h2 className="truncate text-xl text-[var(--ink)]">{brochure.title}</h2>
             </div>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="font-sans-ui shrink-0 text-lg text-[var(--ink)]/50 hover:text-[var(--ink)]"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--ink)]/60 transition hover:bg-[var(--paper-2)] hover:text-[var(--ink)]"
             >
-              ✕
+              <CloseIcon className="h-4.5 w-4.5" />
             </button>
           </div>
 
@@ -140,19 +190,26 @@ export function ShareModal({
               readOnly
               value={url}
               onFocus={(e) => e.target.select()}
-              className="font-sans-ui w-0 flex-1 truncate rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-xs text-[var(--ink)]/70 outline-none"
+              className="font-sans-ui w-0 flex-1 truncate rounded-lg border border-[var(--line)] bg-white px-3 py-2.5 text-xs text-[var(--ink)]/70 outline-none"
             />
             <button
               onClick={copyUrl}
-              className="font-sans-ui shrink-0 rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-xs text-[var(--ink)] transition hover:border-[var(--ink)]"
+              className={`font-sans-ui flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs transition ${
+                copied
+                  ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                  : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
+              }`}
             >
+              {copied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <p className={`font-sans-ui mb-3 text-xs text-red-600 ${copyFailed ? "" : "hidden"}`}>
-            Couldn&apos;t copy automatically — the link is selected above, press ⌘C / Ctrl+C to
-            copy it.
-          </p>
+          {copyFailed && (
+            <p className="font-sans-ui mb-3 text-xs text-red-600">
+              Couldn&apos;t copy automatically — the link is selected above, press ⌘C / Ctrl+C to
+              copy it.
+            </p>
+          )}
 
           <label
             htmlFor="share-message"
@@ -164,34 +221,60 @@ export function ShareModal({
             id="share-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows={6}
-            className="font-sans-ui mb-5 w-full flex-1 rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+            rows={5}
+            className="font-sans-ui mb-5 w-full resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
           />
 
-          <div className="font-sans-ui mb-4 grid grid-cols-2 gap-3">
+          <div className="font-sans-ui mb-6 grid grid-cols-2 gap-3">
             <button
               onClick={sendWhatsApp}
-              className="flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+              className="flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
             >
-              <WhatsAppIcon className="h-4 w-4 shrink-0" />
-              Send via WhatsApp
+              <WhatsAppIcon className="h-5 w-5 shrink-0" />
+              WhatsApp
             </button>
             <button
               onClick={sendEmail}
-              className="flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]"
+              className="flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]"
             >
-              <EmailIcon className="h-4 w-4 shrink-0" />
-              Send via Email
+              <EmailIcon className="h-5 w-5 shrink-0" />
+              Email
             </button>
           </div>
 
-          <button
-            onClick={remove}
-            disabled={isDeleting}
-            className="font-sans-ui w-full text-center text-xs text-red-600/70 hover:text-red-600 disabled:opacity-50"
-          >
-            {isDeleting ? "Removing…" : "Remove this brochure"}
-          </button>
+          <div className="mt-auto border-t border-[var(--line)] pt-5">
+            {confirmingRemove ? (
+              <div className="rounded-xl bg-red-50 p-4">
+                <p className="font-sans-ui mb-3 text-sm text-red-900">
+                  Remove &ldquo;{brochure.title}&rdquo;? This can&apos;t be undone.
+                </p>
+                <div className="font-sans-ui flex gap-3">
+                  <button
+                    onClick={() => setConfirmingRemove(false)}
+                    disabled={isDeleting}
+                    className="flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)] disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmRemove}
+                    disabled={isDeleting}
+                    className="flex-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {isDeleting ? "Removing…" : "Remove"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmingRemove(true)}
+                className="font-sans-ui flex items-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm text-red-600 transition hover:border-red-300 hover:bg-red-50"
+              >
+                <TrashIcon className="h-4 w-4" />
+                Remove this brochure
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
