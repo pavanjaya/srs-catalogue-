@@ -72,16 +72,16 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {brochures.map((brochure) => (
             <button key={brochure.id} onClick={() => setShareTarget(brochure)} className="group text-left">
-              <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+              <div className="mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                 {brochure.thumbnailUrl ? (
                   <Image
                     src={brochure.thumbnailUrl}
                     alt={brochure.title}
-                    width={400}
-                    height={400}
+                    width={800}
+                    height={566}
                     unoptimized
                     className="h-full w-full object-cover transition group-hover:opacity-80"
                   />
