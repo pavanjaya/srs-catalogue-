@@ -1,141 +1,101 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { upload } from "@vercel/blob/client";
-import type { ProductCategory } from "@/lib/products";
-import { categorySlug } from "@/lib/categorySlug";
-import { deleteCategoryBrochure } from "@/app/actions/brochures";
+import { useState } from "react";
+import type { Brochure } from "@/lib/brochures";
+import { UploadBrochureModal } from "@/components/UploadBrochureModal";
+import { ShareModal } from "@/components/ShareModal";
 
-// One row per category — this is the only place brochure PDFs get
-// uploaded, replaced, or removed. ShareModal (opened from a category tile
-// below) is purely for sharing; this is purely for managing the files.
-//
-// Uploads go straight from the browser to Vercel Blob (upload() below),
-// not through a Server Action — real brochure PDFs run several MB, well
-// past Vercel's fixed 4.5MB request-body limit for Functions, which no
-// config can raise. Only deleting (no file body) stays a Server Action.
-function BrochureRow({
-  category,
-  initialUrl,
-}: {
-  category: ProductCategory;
-  initialUrl?: string;
-}) {
-  const [url, setUrl] = useState(initialUrl);
-  const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<number | null>(null);
-  const [isDeleting, startDeleteTransition] = useTransition();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function pickFile() {
-    setError(null);
-    fileInputRef.current?.click();
-  }
-
-  async function onFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-choosing the same file later
-    if (!file) return;
-
-    if (file.type !== "application/pdf") {
-      setError("That doesn't look like a PDF — please choose a .pdf file.");
-      return;
-    }
-
-    setError(null);
-    setProgress(0);
-    try {
-      const blob = await upload(`brochures/${categorySlug(category)}.pdf`, file, {
-        access: "public",
-        handleUploadUrl: "/api/brochures/upload",
-        onUploadProgress: ({ percentage }) => setProgress(percentage),
-      });
-      setUrl(blob.url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed — please try again.");
-    } finally {
-      setProgress(null);
-    }
-  }
-
-  function removeBrochure() {
-    startDeleteTransition(async () => {
-      await deleteCategoryBrochure(category);
-      setUrl(undefined);
-      setError(null);
-    });
-  }
-
-  const isBusy = progress !== null || isDeleting;
-
+function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] py-3 last:border-b-0">
-      <p className="font-sans-ui text-sm text-[var(--ink)]">{category}</p>
-
-      <div className="font-sans-ui flex items-center gap-3 text-sm">
-        <input ref={fileInputRef} type="file" accept="application/pdf" onChange={onFileChosen} className="hidden" />
-        {url ? (
-          <>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--ink)] underline-offset-2 hover:underline"
-            >
-              View PDF ↗
-            </a>
-            <button
-              onClick={pickFile}
-              disabled={isBusy}
-              className="text-[var(--ink)]/60 hover:text-[var(--ink)] disabled:opacity-50"
-            >
-              {progress !== null ? `Uploading… ${progress}%` : "Replace"}
-            </button>
-            <button
-              onClick={removeBrochure}
-              disabled={isBusy}
-              className="text-[var(--ink)]/60 hover:text-[var(--ink)] disabled:opacity-50"
-            >
-              {isDeleting ? "Removing…" : "Remove"}
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={pickFile}
-            disabled={isBusy}
-            className="text-[var(--ink)] underline-offset-2 hover:underline disabled:opacity-50"
-          >
-            {progress !== null ? `Uploading… ${progress}%` : "Upload PDF →"}
-          </button>
-        )}
-      </div>
-
-      {error && <p className="font-sans-ui w-full text-xs text-red-600">{error}</p>}
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M14 3v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
   );
 }
 
-export function BrochureManager({
-  categories,
-  brochures,
-}: {
-  categories: readonly ProductCategory[];
-  brochures: Partial<Record<ProductCategory, string>>;
-}) {
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+// The whole admin homepage: nothing until you upload something, then every
+// brochure is a card — click it to share (or remove) via ShareModal.
+export function BrochureManager({ initialBrochures }: { initialBrochures: Brochure[] }) {
+  const [brochures, setBrochures] = useState(initialBrochures);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [shareTarget, setShareTarget] = useState<Brochure | null>(null);
+
+  function handleUploaded(brochure: Brochure) {
+    setBrochures((prev) => [brochure, ...prev]);
+    setUploadOpen(false);
+  }
+
+  function handleDeleted(id: string) {
+    setBrochures((prev) => prev.filter((b) => b.id !== id));
+    setShareTarget(null);
+  }
+
   return (
-    <section className="mb-14 rounded-2xl border border-[var(--line)] bg-white p-6">
-      <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-        Manage Brochures
-      </p>
-      <p className="font-sans-ui mb-5 text-sm text-[var(--ink)]/60">
-        One PDF per category. Upload here once — it appears immediately on that category&apos;s
-        public page and stays there until replaced or removed.
-      </p>
-      <div>
-        {categories.map((category) => (
-          <BrochureRow key={category} category={category} initialUrl={brochures[category]} />
-        ))}
+    <div>
+      <div className="mb-10 flex items-start justify-between gap-4">
+        <div>
+          <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+            Brochures
+          </p>
+          <p className="font-sans-ui max-w-md text-sm text-[var(--ink)]/60">
+            Every brochure gets its own link. Upload once, share it, replace it whenever there's a
+            new version.
+          </p>
+        </div>
+        <button
+          onClick={() => setUploadOpen(true)}
+          className="font-sans-ui shrink-0 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+        >
+          + Upload Brochure
+        </button>
       </div>
-    </section>
+
+      {brochures.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--line)] py-20 text-center">
+          <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">No brochures yet.</p>
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="font-sans-ui text-sm text-[var(--ink)] underline-offset-2 hover:underline"
+          >
+            Upload your first brochure →
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {brochures.map((brochure) => (
+            <button
+              key={brochure.id}
+              onClick={() => setShareTarget(brochure)}
+              className="group rounded-xl border border-[var(--line)] bg-white p-5 text-left transition hover:border-[var(--ink)]"
+            >
+              <PdfIcon className="mb-4 h-8 w-8 text-[var(--ash)] transition group-hover:text-[var(--ink)]" />
+              <p className="font-sans-ui mb-1 text-sm text-[var(--ink)]">{brochure.title}</p>
+              <p className="font-sans-ui text-xs text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {uploadOpen && (
+        <UploadBrochureModal onClose={() => setUploadOpen(false)} onUploaded={handleUploaded} />
+      )}
+      {shareTarget && (
+        <ShareModal
+          brochure={shareTarget}
+          onClose={() => setShareTarget(null)}
+          onDeleted={() => handleDeleted(shareTarget.id)}
+        />
+      )}
+    </div>
   );
 }

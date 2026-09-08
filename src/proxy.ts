@@ -8,7 +8,7 @@ const PUBLIC_PREFIXES = ["/login", "/images/", "/brand/", "/fonts/", "/favicon"]
 // at) are intentionally open — no PIN. A client opening a shared link
 // should land straight on the catalogue, not a login screen. Only the
 // admin dashboard (root "/") stays behind ADMIN_PASSWORD.
-const CLIENT_PREFIXES = ["/catalogues", "/catalogue/", "/pdfs/"];
+const CLIENT_PREFIXES = ["/catalogues", "/catalogue/", "/brochure/", "/pdfs/"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

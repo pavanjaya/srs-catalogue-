@@ -1,30 +1,57 @@
 import { list } from "@vercel/blob";
-import type { ProductCategory } from "@/lib/products";
-import { categorySlug } from "@/lib/categorySlug";
 
 // Server-only: reads BLOB_READ_WRITE_TOKEN, so this must only ever be
-// imported from Server Components / Server Actions, never a "use client" file.
+// imported from Server Components / Server Actions / Route Handlers,
+// never a "use client" file.
 
-// One real, designed PDF brochure per category, stored in Vercel Blob under
-// brochures/<category-slug>.pdf — no database: the blob store's own listing
-// is the source of truth for "does this category have a brochure, and what's
-// its current URL." Uploading again at the same slug overwrites it, so
-// there's never more than one live brochure per category.
-export { categorySlug };
+// Freeform brochures — no fixed category list, no database. Each PDF is
+// stored at brochures/<id>--<encodeURIComponent(title)>.pdf; the id gives
+// a stable public URL and delete target, the title is carried in the
+// pathname itself since there's nowhere else to keep it. The blob store's
+// own listing is the entire source of truth.
+export type Brochure = {
+  id: string;
+  title: string;
+  url: string;
+  uploadedAt: string; // ISO
+};
 
-// category -> live brochure URL, only for categories that actually have one.
-export async function getCategoryBrochures(
-  categories: readonly ProductCategory[],
-): Promise<Partial<Record<ProductCategory, string>>> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return {};
-  const { blobs } = await list({ prefix: "brochures/", limit: 1000 });
-  const urlBySlug = new Map(
-    blobs.map((b) => [b.pathname.replace(/^brochures\//, "").replace(/\.pdf$/, ""), b.url]),
-  );
-  const result: Partial<Record<ProductCategory, string>> = {};
-  for (const category of categories) {
-    const url = urlBySlug.get(categorySlug(category));
-    if (url) result[category] = url;
+const PATHNAME_RE = /^brochures\/([a-zA-Z0-9_-]+)--(.+)\.pdf$/;
+
+export function buildBrochurePathname(id: string, title: string): string {
+  return `brochures/${id}--${encodeURIComponent(title)}.pdf`;
+}
+
+function parsePathname(pathname: string): { id: string; title: string } | null {
+  const match = pathname.match(PATHNAME_RE);
+  if (!match) return null;
+  try {
+    return { id: match[1], title: decodeURIComponent(match[2]) };
+  } catch {
+    return null;
   }
-  return result;
+}
+
+export async function getBrochures(): Promise<Brochure[]> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
+  const { blobs } = await list({ prefix: "brochures/", limit: 1000 });
+  const brochures: Brochure[] = [];
+  for (const blob of blobs) {
+    const parsed = parsePathname(blob.pathname);
+    if (!parsed) continue;
+    brochures.push({
+      id: parsed.id,
+      title: parsed.title,
+      url: blob.url,
+      uploadedAt: new Date(blob.uploadedAt).toISOString(),
+    });
+  }
+  // Newest first.
+  brochures.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
+  return brochures;
+}
+
+export async function getBrochureById(id: string): Promise<Brochure | null> {
+  const all = await getBrochures();
+  return all.find((b) => b.id === id) ?? null;
 }

@@ -2,15 +2,12 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { productCategories } from "@/lib/products";
-import { categorySlug } from "@/lib/categorySlug";
 
-// Real brochure PDFs (several MB, real photography) blow past Vercel's
-// hard 4.5MB request-body limit for Functions — that limit can't be
-// raised, so the file has to go straight from the browser to Blob storage
-// instead of through a Server Action / API route body. This route only
-// issues the short-lived upload token; the file itself never touches it.
-const validPathnames = new Set(productCategories.map((c) => `brochures/${categorySlug(c)}.pdf`));
+// Real brochure PDFs run several MB — well past Vercel's fixed 4.5MB
+// request-body limit for Functions, which no config can raise. The file
+// goes straight from the browser to Blob storage; this route only issues
+// the short-lived upload token, never touches the file itself.
+const PATHNAME_RE = /^brochures\/[a-zA-Z0-9_-]+--.+\.pdf$/;
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody;
@@ -28,8 +25,8 @@ export async function POST(request: Request): Promise<NextResponse> {
         if (!adminSession || adminSession !== process.env.ADMIN_PASSWORD) {
           throw new Error("Not authenticated.");
         }
-        if (!validPathnames.has(pathname)) {
-          throw new Error("Unknown category.");
+        if (!PATHNAME_RE.test(pathname)) {
+          throw new Error("Invalid brochure path.");
         }
 
         return {
@@ -39,7 +36,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         };
       },
       onUploadCompleted: async () => {
-        revalidatePath("/catalogues");
         revalidatePath("/");
       },
     });

@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
-import { getCategoryBrochures } from "@/lib/brochures";
-import { AdminCategoryBrowser } from "@/components/AdminCategoryBrowser";
+import { getBrochures } from "@/lib/brochures";
 import { BrochureManager } from "@/components/BrochureManager";
 import { logout } from "./actions";
 
@@ -12,8 +10,7 @@ import { logout } from "./actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const byCategory = getProductsByCategory();
-  const brochures = await getCategoryBrochures(productCategories);
+  const brochures = await getBrochures();
 
   return (
     <>
@@ -50,14 +47,11 @@ export default async function AdminPage() {
             className="mb-6 h-10 w-auto sm:h-12"
           />
           <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
-            Every piece carries its own story, and its own catalogue. Open one
-            below, or share its link — it arrives exactly as itself.
+            Upload a brochure, share its link — it arrives exactly as itself.
           </p>
         </header>
 
-        <BrochureManager categories={productCategories} brochures={brochures} />
-
-        <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} brochures={brochures} />
+        <BrochureManager initialBrochures={brochures} />
       </div>
     </>
   );
