@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getProductsByCategory } from "@/lib/products";
+import { Suspense } from "react";
+import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
-import { ShareComposer } from "@/components/ShareComposer";
+import { AdminCategoryBrowser } from "@/components/AdminCategoryBrowser";
 import { logout } from "./actions";
 
 export default function AdminPage() {
@@ -48,46 +49,9 @@ export default function AdminPage() {
           </p>
         </header>
 
-      {[...byCategory.entries()].map(([category, products]) => (
-        <section key={category} className="mb-14">
-          <div className="mb-6 flex items-center justify-between gap-3">
-            <h2 className="font-sans-ui text-lg">{category}</h2>
-            <ShareComposer
-              triggerLabel="Share category"
-              dialogTitle={category}
-              path={`/catalogues?category=${encodeURIComponent(category)}`}
-              messageTemplate={`Hi, here's our full ${category} range 👇\n{url}\nBrowse the collection — open any piece for its own catalogue.`}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {products.map((product) => (
-              <div key={product.slug} className="group">
-                <Link href={`/catalogue/${product.slug}`} target="_blank" className="block">
-                  <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      width={400}
-                      height={400}
-                      className="h-auto w-full object-cover transition group-hover:opacity-80"
-                    />
-                  </div>
-                </Link>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">
-                    {product.name}
-                  </p>
-                  <ShareComposer
-                    dialogTitle={product.name}
-                    path={`/catalogue/${product.slug}`}
-                    messageTemplate={`Hi, here's the catalogue for ${product.name} you asked about 👇\n{url}\nYou can also browse our other designs from the same page.`}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        ))}
+        <Suspense fallback={null}>
+          <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} />
+        </Suspense>
       </div>
     </>
   );
