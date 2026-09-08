@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { AdminCategoryBrowser } from "@/components/AdminCategoryBrowser";
@@ -49,9 +48,7 @@ export default function AdminPage() {
           </p>
         </header>
 
-        <Suspense fallback={null}>
-          <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} />
-        </Suspense>
+        <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} />
       </div>
     </>
   );

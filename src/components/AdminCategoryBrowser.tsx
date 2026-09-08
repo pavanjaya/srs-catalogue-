@@ -1,14 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import type { Product, ProductCategory } from "@/lib/products";
-import { ShareComposer } from "@/components/ShareComposer";
+import { ShareModal } from "@/components/ShareModal";
 
-// Same grid-then-drilldown pattern as the public CategoryBrowser, but each
-// tile/product also carries its Share control — this is where links
-// actually get composed and sent.
+// Admin landing: a grid of category tiles. Clicking one opens the
+// preview-and-share modal for that category — no page navigation.
 export function AdminCategoryBrowser({
   categories,
   byCategory,
@@ -16,29 +14,17 @@ export function AdminCategoryBrowser({
   categories: readonly ProductCategory[];
   byCategory: Map<ProductCategory, Product[]>;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const requested = searchParams.get("category");
-  const active = requested && categories.find((c) => c === requested) ? (requested as ProductCategory) : null;
+  const [openCategory, setOpenCategory] = useState<ProductCategory | null>(null);
 
-  function open(category: ProductCategory) {
-    router.push(`${pathname}?category=${encodeURIComponent(category)}`, { scroll: false });
-  }
-
-  function goBack() {
-    router.push(pathname, { scroll: false });
-  }
-
-  if (!active) {
-    return (
+  return (
+    <>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {categories.map((category) => {
           const products = byCategory.get(category) ?? [];
           const cover = products[0];
           const count = products.filter((p) => !p.placeholder).length;
           return (
-            <button key={category} onClick={() => open(category)} className="group text-left">
+            <button key={category} onClick={() => setOpenCategory(category)} className="group text-left">
               <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                 {cover ? (
                   <Image
@@ -60,57 +46,14 @@ export function AdminCategoryBrowser({
           );
         })}
       </div>
-    );
-  }
 
-  const products = byCategory.get(active) ?? [];
-
-  return (
-    <div>
-      <button onClick={goBack} className="font-sans-ui mb-6 text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
-        ← All categories
-      </button>
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h2 className="font-sans-ui text-lg text-[var(--ink)]">{active}</h2>
-        <ShareComposer
-          triggerLabel="Share category"
-          dialogTitle={active}
-          path={`/catalogues?category=${encodeURIComponent(active)}`}
-          messageTemplate={`Hi, here's our full ${active} range 👇\n{url}\nBrowse the collection — open any piece for its own catalogue.`}
+      {openCategory && (
+        <ShareModal
+          category={openCategory}
+          products={byCategory.get(openCategory) ?? []}
+          onClose={() => setOpenCategory(null)}
         />
-      </div>
-
-      {products.length === 0 ? (
-        <p className="font-sans-ui py-10 text-sm text-[var(--ink)]/50">
-          More pieces from this category are on their way.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {products.map((product) => (
-            <div key={product.slug} className="group">
-              <Link href={`/catalogue/${product.slug}`} target="_blank" className="block">
-                <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={400}
-                    height={400}
-                    className="h-auto w-full object-cover transition group-hover:opacity-80"
-                  />
-                </div>
-              </Link>
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">{product.name}</p>
-                <ShareComposer
-                  dialogTitle={product.name}
-                  path={`/catalogue/${product.slug}`}
-                  messageTemplate={`Hi, here's the catalogue for ${product.name} you asked about 👇\n{url}\nYou can also browse our other designs from the same page.`}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
       )}
-    </div>
+    </>
   );
 }
