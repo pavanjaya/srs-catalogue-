@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { getAllProducts, getOtherProducts, getProductBySlug } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { SiteHeader } from "@/components/SiteHeader";
+import { FloatingContact } from "@/components/FloatingContact";
+import { PhoneIcon, WhatsAppIcon, EmailIcon, InstagramIcon } from "@/components/ConnectIcons";
 
 export async function generateStaticParams() {
   return getAllProducts().map((product) => ({ slug: product.slug }));
@@ -116,29 +118,35 @@ export default async function CataloguePage({
       </section>
 
       <footer className="font-sans-ui mt-16 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--line)] pt-6 text-sm text-[var(--ink)]/60">
-        <a href={`tel:${studio.phone}`} className="hover:text-[var(--ink)]">
+        <a href={`tel:${studio.phone}`} className="flex items-center gap-2 hover:text-[var(--ink)]">
+          <PhoneIcon className="h-4 w-4 shrink-0" />
           Call
         </a>
         <a
           href={`https://wa.me/${studio.whatsapp}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-[var(--ink)]"
+          className="flex items-center gap-2 hover:text-[var(--ink)]"
         >
+          <WhatsAppIcon className="h-4 w-4 shrink-0" />
           WhatsApp
         </a>
-        <a href={`mailto:${studio.email}`} className="hover:text-[var(--ink)]">
+        <a href={`mailto:${studio.email}`} className="flex items-center gap-2 hover:text-[var(--ink)]">
+          <EmailIcon className="h-4 w-4 shrink-0" />
           Email
         </a>
         <a
           href={studio.instagram}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-[var(--ink)]"
+          className="flex items-center gap-2 hover:text-[var(--ink)]"
         >
+          <InstagramIcon className="h-4 w-4 shrink-0" />
           Instagram
         </a>
       </footer>
+
+      <FloatingContact />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Product, ProductCategory } from "@/lib/products";
+import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
 
 // The admin panel's preview-and-share popup. Opens for a whole category
 // (left pane = that category's product grid) or, once you click a product
@@ -186,14 +187,16 @@ export function ShareModal({
           <div className="font-sans-ui grid grid-cols-2 gap-3">
             <button
               onClick={sendWhatsApp}
-              className="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+              className="flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
             >
+              <WhatsAppIcon className="h-4 w-4 shrink-0" />
               Send via WhatsApp
             </button>
             <button
               onClick={sendEmail}
-              className="rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]"
+              className="flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]"
             >
+              <EmailIcon className="h-4 w-4 shrink-0" />
               Send via Email
             </button>
           </div>

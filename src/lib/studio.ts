@@ -4,5 +4,7 @@ export const studio = {
   phone: "+919967788543",
   whatsapp: "919967788543",
   email: "shaileshrajputstudio@gmail.com",
-  instagram: "https://ig.me/m/shaileshrajputstudio",
+  instagram: "https://www.instagram.com/shaileshrajputstudio/",
+  instagramDm: "https://ig.me/m/shaileshrajputstudio",
+  facebook: "https://www.facebook.com/ShaileshRajputStudio",
 };

@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* SRS foundational palette — see brand graphic guidelines */
+  /* SRS foundational palette — matches the main studio website exactly */
   --ink: #1e1e1e; /* Carbon Black */
-  --paper: #e4ded7; /* Bone White */
+  --paper: #f6f1e6; /* Bone White */
   --paper-2: #dcd5cb;
   --accent: #ffad21; /* Amber — used sparingly, interactive/decorative only */
   --ash: #646468; /* Ash Grey */
@@ -22,4 +22,40 @@ body {
 
 .font-sans-ui {
   font-family: var(--font-duru), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* A gentler alternative to Tailwind's default animate-ping, which resets
+   instantly at the top of every loop — visible as an abrupt snap. This
+   holds at opacity 0 for the back third of the cycle, so the reset
+   happens while invisible, and runs slower for a calm "breathing" pulse.
+   Ported from the main studio website for the floating contact button. */
+@keyframes srs-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  65%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: srs-pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes srs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: srs-fade-up 0.6s ease forwards;
 }

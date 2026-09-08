@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
+import { FloatingContact } from "@/components/FloatingContact";
 
 export default async function CataloguesPage({
   searchParams,
@@ -55,6 +56,8 @@ export default async function CataloguesPage({
       <Suspense fallback={null}>
         <CategoryBrowser categories={productCategories} byCategory={byCategory} linkPrefix="/catalogue" />
       </Suspense>
+
+      <FloatingContact />
     </div>
   );
 }
