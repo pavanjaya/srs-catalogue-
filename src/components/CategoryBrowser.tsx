@@ -101,8 +101,8 @@ export function CategoryBrowser({
         <h1 className="mb-4 text-3xl leading-tight sm:text-4xl">{active}</h1>
         <p className="mb-8 max-w-xl text-[var(--ink)]/70">
           {realCount > 0
-            ? `${realCount} handcrafted piece${realCount === 1 ? "" : "s"} from the studio's ${active} range.`
-            : "More pieces from this category are on their way."}
+            ? `The full ${active} brochure — ${realCount} piece${realCount === 1 ? "" : "s"} from this range, each with its own catalogue page.`
+            : `The ${active} brochure is being put together — real pieces from this range will appear here soon.`}
         </p>
 
         {cover && (
@@ -118,7 +118,7 @@ export function CategoryBrowser({
           </div>
         )}
 
-        {heroProducts.length > 0 && (
+        {heroProducts.length > 1 && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {heroProducts.map((product) => (
               <Link key={product.slug} href={`${linkPrefix}/${product.slug}`} className="group block">
