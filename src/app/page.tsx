@@ -3,7 +3,7 @@ import Link from "next/link";
 import { studio } from "@/lib/studio";
 import { getBrochures } from "@/lib/brochures";
 import { BrochureManager } from "@/components/BrochureManager";
-import { logout } from "./actions";
+import { LogoutButton } from "@/components/LogoutButton";
 
 // Always fresh — the admin dashboard needs to show the current brochure
 // state immediately after an upload, not a stale cached snapshot.
@@ -27,11 +27,7 @@ export default async function AdminPage() {
           >
             Visit full website ↗
           </Link>
-          <form action={logout}>
-            <button type="submit" className="text-white/70 hover:text-white">
-              Log out
-            </button>
-          </form>
+          <LogoutButton />
         </div>
       </div>
 

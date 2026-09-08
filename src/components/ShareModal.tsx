@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
 import { deleteBrochure } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
+import { PdfPreview } from "@/components/PdfPreview";
 
 function CloseIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -149,9 +150,9 @@ export function ShareModal({
         className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl sm:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left — the actual PDF, browser-native viewer (page number, zoom, scroll) */}
+        {/* Left — a brand-styled preview (own page controls, no native PDF chrome) */}
         <div className="hidden h-full w-1/2 border-r border-[var(--line)] bg-[var(--paper-2)] sm:block">
-          <iframe src={brochure.url} title={brochure.title} className="h-full w-full" />
+          <PdfPreview url={brochure.url} title={brochure.title} />
         </div>
 
         {/* Right — link, message, send */}
