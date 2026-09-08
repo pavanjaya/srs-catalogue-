@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
 import { deleteBrochure } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
@@ -22,7 +22,9 @@ export function ShareModal({
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const [isDeleting, startTransition] = useTransition();
+  const urlInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fullUrl = `${window.location.origin}/brochure/${brochure.id}`;
@@ -42,11 +44,33 @@ export function ShareModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  function copyUrl() {
-    navigator.clipboard.writeText(url).then(() => {
+  async function copyUrl() {
+    setCopyFailed(false);
+    try {
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    });
+      return;
+    } catch {
+      // Clipboard API can be denied (permissions, some browser/OS
+      // policies) — fall back to select + the legacy copy command
+      // before giving up and just asking the user to copy manually.
+    }
+    const input = urlInputRef.current;
+    input?.focus();
+    input?.select();
+    try {
+      const ok = document.execCommand("copy");
+      if (ok) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+        return;
+      }
+    } catch {
+      // fall through to manual-copy messaging below
+    }
+    setCopyFailed(true);
+    setTimeout(() => setCopyFailed(false), 3000);
   }
 
   function sendWhatsApp() {
@@ -110,8 +134,9 @@ export function ShareModal({
           <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
             Link
           </label>
-          <div className="mb-5 flex items-center gap-2">
+          <div className="mb-2 flex items-center gap-2">
             <input
+              ref={urlInputRef}
               readOnly
               value={url}
               onFocus={(e) => e.target.select()}
@@ -124,6 +149,10 @@ export function ShareModal({
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
+          <p className={`font-sans-ui mb-3 text-xs text-red-600 ${copyFailed ? "" : "hidden"}`}>
+            Couldn&apos;t copy automatically — the link is selected above, press ⌘C / Ctrl+C to
+            copy it.
+          </p>
 
           <label
             htmlFor="share-message"

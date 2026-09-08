@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
@@ -54,6 +54,16 @@ export function UploadBrochureModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBusy = progress !== null;
+
+  // Close on Escape, same as ShareModal — but not mid-upload, matching the
+  // backdrop-click guard below.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !isBusy) onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, isBusy]);
 
   function pickFile() {
     if (isBusy) return;

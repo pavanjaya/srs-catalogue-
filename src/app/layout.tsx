@@ -29,11 +29,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Catalogues — Shailesh Rajput Studio",
+    default: "Catalogue Library — Shailesh Rajput Studio",
     template: "%s — Shailesh Rajput Studio",
   },
-  description:
-    "Browse and share product catalogues from Shailesh Rajput Studio.",
+  description: "Product catalogues from Shailesh Rajput Studio.",
+  // Brochure links are shared privately (WhatsApp, email) with specific
+  // clients — not meant to turn up in search results.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
