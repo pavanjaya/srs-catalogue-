@@ -4,6 +4,7 @@ import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { getCategoryBrochures } from "@/lib/brochures";
 import { AdminCategoryBrowser } from "@/components/AdminCategoryBrowser";
+import { BrochureManager } from "@/components/BrochureManager";
 import { logout } from "./actions";
 
 // Always fresh — the admin dashboard needs to show the current brochure
@@ -53,6 +54,8 @@ export default async function AdminPage() {
             below, or share its link — it arrives exactly as itself.
           </p>
         </header>
+
+        <BrochureManager categories={productCategories} brochures={brochures} />
 
         <AdminCategoryBrowser categories={productCategories} byCategory={byCategory} brochures={brochures} />
       </div>

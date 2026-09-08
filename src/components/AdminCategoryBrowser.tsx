@@ -59,7 +59,6 @@ export function AdminCategoryBrowser({
         <ShareModal
           category={openCategory}
           products={byCategory.get(openCategory) ?? []}
-          brochureUrl={brochures[openCategory]}
           onClose={() => setOpenCategory(null)}
         />
       )}

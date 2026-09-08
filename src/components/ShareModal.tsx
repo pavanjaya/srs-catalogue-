@@ -1,67 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import type { Product, ProductCategory } from "@/lib/products";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { uploadCategoryBrochure, deleteCategoryBrochure } from "@/app/actions/brochures";
 
 // The admin panel's preview-and-share popup. Opens for a whole category
 // (left pane = that category's product grid) or, once you click a product
 // inside it, narrows to that one product (left pane = its photo + details) —
 // same modal, same right-hand compose panel, no page navigation either way.
-// The category view also carries the one PDF brochure for that category —
-// upload, replace, or remove it right here, backed by Vercel Blob.
+// Purely about sharing — brochure PDFs are managed separately, on the admin
+// homepage (see BrochureManager), not from inside this popup.
 export function ShareModal({
   category,
   products,
-  brochureUrl: initialBrochureUrl,
   onClose,
 }: {
   category: ProductCategory;
   products: Product[];
-  brochureUrl?: string;
   onClose: () => void;
 }) {
   const [focused, setFocused] = useState<Product | null>(null);
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
-
-  const [brochureUrl, setBrochureUrl] = useState(initialBrochureUrl);
-  const [brochureError, setBrochureError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function pickFile() {
-    setBrochureError(null);
-    fileInputRef.current?.click();
-  }
-
-  function onFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow choosing the same file again later
-    if (!file) return;
-    const formData = new FormData();
-    formData.set("file", file);
-    startTransition(async () => {
-      const result = await uploadCategoryBrochure(category, formData);
-      if ("error" in result) {
-        setBrochureError(result.error);
-      } else {
-        setBrochureUrl(result.url);
-        setBrochureError(null);
-      }
-    });
-  }
-
-  function removeBrochure() {
-    startTransition(async () => {
-      await deleteCategoryBrochure(category);
-      setBrochureUrl(undefined);
-      setBrochureError(null);
-    });
-  }
 
   useEffect(() => {
     const path = focused
@@ -142,57 +104,6 @@ export function ShareModal({
               <p className="font-sans-ui mb-4 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
                 {category} — {products.length} piece{products.length === 1 ? "" : "s"}
               </p>
-
-              <div className="mb-5 rounded-xl border border-[var(--line)] bg-white p-4">
-                <p className="font-sans-ui mb-2 text-xs tracking-[0.15em] text-[var(--ash)] uppercase">
-                  Category Brochure (PDF)
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/pdf"
-                  onChange={onFileChosen}
-                  className="hidden"
-                />
-                {brochureUrl ? (
-                  <div className="font-sans-ui flex flex-wrap items-center gap-3 text-sm">
-                    <a
-                      href={brochureUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--ink)] underline-offset-2 hover:underline"
-                    >
-                      View current PDF ↗
-                    </a>
-                    <button
-                      onClick={pickFile}
-                      disabled={isPending}
-                      className="text-[var(--ink)]/60 hover:text-[var(--ink)] disabled:opacity-50"
-                    >
-                      {isPending ? "Uploading…" : "Replace"}
-                    </button>
-                    <button
-                      onClick={removeBrochure}
-                      disabled={isPending}
-                      className="text-[var(--ink)]/60 hover:text-[var(--ink)] disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={pickFile}
-                    disabled={isPending}
-                    className="font-sans-ui text-sm text-[var(--ink)] underline-offset-2 hover:underline disabled:opacity-50"
-                  >
-                    {isPending ? "Uploading…" : "Upload a PDF brochure for this category →"}
-                  </button>
-                )}
-                {brochureError && (
-                  <p className="font-sans-ui mt-2 text-xs text-red-600">{brochureError}</p>
-                )}
-              </div>
-
               {products.length === 0 ? (
                 <p className="font-sans-ui text-sm text-[var(--ink)]/50">
                   More pieces from this category are on their way.
