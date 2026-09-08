@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBrochureById, getBrochures } from "@/lib/brochures";
 import { studio } from "@/lib/studio";
-import { SiteHeader } from "@/components/SiteHeader";
 import { FloatingContact } from "@/components/FloatingContact";
 import { PdfIcon } from "@/components/BrochureManager";
 
@@ -54,7 +53,15 @@ export default async function BrochurePage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 sm:py-14">
-      <SiteHeader />
+      <Image
+        src="/brand/srs-logo.png"
+        alt={studio.name}
+        width={1488}
+        height={366}
+        priority
+        unoptimized
+        className="mb-10 h-9 w-auto sm:h-10"
+      />
 
       <section className="mb-16">
         <p className="font-sans-ui mb-3 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
@@ -92,12 +99,7 @@ export default async function BrochurePage({
 
       {others.length > 0 && (
         <section>
-          <div className="font-sans-ui mb-6 flex items-baseline justify-between">
-            <h2 className="text-lg">Explore More From Our Collection</h2>
-            <Link href="/catalogues" className="text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
-              View all catalogues →
-            </Link>
-          </div>
+          <h2 className="font-sans-ui mb-6 text-lg">Explore More From Our Collection</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((other) => (
               <Link key={other.id} href={`/brochure/${other.id}`} className="group block">
