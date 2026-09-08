@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Tailwind v4 preflight resets <button> to the browser default (cursor:
+   default). Every button/card in this site is clickable, so restore the
+   hand cursor globally instead of adding cursor-pointer to each one. */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 :root {
   /* SRS foundational palette — matches the main studio website exactly */
   --ink: #1e1e1e; /* Carbon Black */

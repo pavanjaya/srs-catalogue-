@@ -1,9 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
+import { PdfIcon } from "@/components/BrochureManager";
+
+function UploadCloudIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M7 18a4.5 4.5 0 0 1-.5-8.98A5.5 5.5 0 0 1 17.3 8.02 4 4 0 0 1 17 16h-1"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 11v8m0-8 3 3m-3-3-3 3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function formatSize(bytes: number) {
+  return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
 
 // The only way a brochure gets created: give it a title, choose the PDF,
 // upload. Goes straight from the browser to Vercel Blob (not through a
@@ -21,11 +47,35 @@ export function UploadBrochureModal({
 }) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBusy = progress !== null;
+
+  function pickFile() {
+    if (isBusy) return;
+    fileInputRef.current?.click();
+  }
+
+  function chooseFile(chosen: File | null | undefined) {
+    if (!chosen) return;
+    if (chosen.type !== "application/pdf") {
+      setError("That doesn't look like a PDF — please choose a .pdf file.");
+      return;
+    }
+    setError(null);
+    setFile(chosen);
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    if (isBusy) return;
+    chooseFile(e.dataTransfer.files?.[0]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,10 +88,6 @@ export function UploadBrochureModal({
     }
     if (!file) {
       setError("Choose a PDF file.");
-      return;
-    }
-    if (file.type !== "application/pdf") {
-      setError("That doesn't look like a PDF — please choose a .pdf file.");
       return;
     }
 
@@ -123,12 +169,44 @@ export function UploadBrochureModal({
           PDF File
         </label>
         <input
+          ref={fileInputRef}
           type="file"
           accept="application/pdf"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          disabled={isBusy}
-          className="font-sans-ui mb-5 w-full text-sm text-[var(--ink)] disabled:opacity-60"
+          onChange={(e) => chooseFile(e.target.files?.[0])}
+          className="hidden"
         />
+        <button
+          type="button"
+          onClick={pickFile}
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!isBusy) setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={onDrop}
+          disabled={isBusy}
+          className={`font-sans-ui mb-5 flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition disabled:opacity-60 ${
+            isDragging
+              ? "border-[var(--ink)] bg-[var(--paper-2)]/40"
+              : "border-[var(--line)] hover:border-[var(--ink)]/50"
+          }`}
+        >
+          {file ? (
+            <>
+              <PdfIcon className="h-8 w-8 text-[var(--ink)]" />
+              <p className="max-w-full truncate text-sm text-[var(--ink)]">{file.name}</p>
+              <p className="text-xs text-[var(--ink)]/50">{formatSize(file.size)} — click to change</p>
+            </>
+          ) : (
+            <>
+              <UploadCloudIcon className="h-7 w-7 text-[var(--ink)]/50" />
+              <p className="text-sm text-[var(--ink)]">
+                <span className="underline underline-offset-2">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-xs text-[var(--ink)]/50">PDF, any size</p>
+            </>
+          )}
+        </button>
 
         {error && <p className="font-sans-ui mb-4 text-xs text-red-600">{error}</p>}
 
