@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Product, ProductCategory } from "@/lib/products";
 
 export function CategoryBrowser({
@@ -15,37 +14,71 @@ export function CategoryBrowser({
   byCategory: Map<ProductCategory, Product[]>;
   linkPrefix?: string;
 }) {
-  const firstNonEmpty = categories.find((c) => (byCategory.get(c) ?? []).length > 0) ?? categories[0];
-
-  // Supports a direct link into one category — /catalogues?category=Wall+Sconces
-  // — so the admin panel's "Share category" button has somewhere to point.
+  // /catalogues?category=Wall+Sconces jumps straight into one category —
+  // used by the admin panel's "Share category" button, and by clicking a
+  // tile below. No category in the URL shows the category grid instead.
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const requested = searchParams.get("category");
-  const initial =
-    (requested && categories.find((c) => c === requested)) || firstNonEmpty;
+  const active = requested && categories.find((c) => c === requested) ? (requested as ProductCategory) : null;
 
-  const [active, setActive] = useState<ProductCategory>(initial);
+  function open(category: ProductCategory) {
+    router.push(`${pathname}?category=${encodeURIComponent(category)}`, { scroll: false });
+  }
+
+  function goBack() {
+    router.push(pathname, { scroll: false });
+  }
+
+  if (!active) {
+    return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {categories.map((category) => {
+          const products = byCategory.get(category) ?? [];
+          const cover = products[0];
+          const count = products.filter((p) => !p.placeholder).length;
+          return (
+            <button
+              key={category}
+              onClick={() => open(category)}
+              className="group text-left"
+            >
+              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+                {cover ? (
+                  <Image
+                    src={cover.image}
+                    alt={category}
+                    width={400}
+                    height={400}
+                    className="aspect-square h-auto w-full object-cover transition group-hover:opacity-80"
+                  />
+                ) : (
+                  <div className="aspect-square bg-[var(--paper-2)]" />
+                )}
+              </div>
+              <p className="font-sans-ui text-sm text-[var(--ink)]">{category}</p>
+              <p className="font-sans-ui text-xs text-[var(--ink)]/50">
+                {count > 0 ? `${count} piece${count === 1 ? "" : "s"}` : "Coming soon"}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   const products = byCategory.get(active) ?? [];
 
   return (
     <div>
-      <div className="font-sans-ui -mx-6 mb-8 overflow-x-auto border-y border-[var(--line)] px-6">
-        <div className="flex gap-1 py-1">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActive(category)}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm whitespace-nowrap transition ${
-                active === category
-                  ? "bg-[var(--ink)] text-white"
-                  : "text-[var(--ink)]/60 hover:text-[var(--ink)]"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
+      <button
+        onClick={goBack}
+        className="font-sans-ui mb-6 text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]"
+      >
+        ← All categories
+      </button>
+      <h2 className="font-sans-ui mb-6 text-lg text-[var(--ink)]">{active}</h2>
 
       {products.length === 0 ? (
         <p className="font-sans-ui py-10 text-sm text-[var(--ink)]/50">
