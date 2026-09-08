@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import type { Brochure } from "@/lib/brochures";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
 import { ShareModal } from "@/components/ShareModal";
 
-function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
+export function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
@@ -73,13 +74,22 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {brochures.map((brochure) => (
-            <button
-              key={brochure.id}
-              onClick={() => setShareTarget(brochure)}
-              className="group rounded-xl border border-[var(--line)] bg-white p-5 text-left transition hover:border-[var(--ink)]"
-            >
-              <PdfIcon className="mb-4 h-8 w-8 text-[var(--ash)] transition group-hover:text-[var(--ink)]" />
-              <p className="font-sans-ui mb-1 text-sm text-[var(--ink)]">{brochure.title}</p>
+            <button key={brochure.id} onClick={() => setShareTarget(brochure)} className="group text-left">
+              <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+                {brochure.thumbnailUrl ? (
+                  <Image
+                    src={brochure.thumbnailUrl}
+                    alt={brochure.title}
+                    width={400}
+                    height={400}
+                    unoptimized
+                    className="h-full w-full object-cover transition group-hover:opacity-80"
+                  />
+                ) : (
+                  <PdfIcon className="h-10 w-10 text-[var(--line)]" />
+                )}
+              </div>
+              <p className="font-sans-ui truncate text-sm text-[var(--ink)]">{brochure.title}</p>
               <p className="font-sans-ui text-xs text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
             </button>
           ))}

@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
+import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
+import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
 
 // The only way a brochure gets created: give it a title, choose the PDF,
 // upload. Goes straight from the browser to Vercel Blob (not through a
 // Server Action) — real brochures run several MB, past Vercel's fixed
-// 4.5MB request-body limit for Functions.
+// 4.5MB request-body limit for Functions. A cover-page thumbnail is
+// rendered client-side (pdfjs-dist) and uploaded alongside the PDF — if
+// that step fails for any reason, the brochure still gets created, just
+// without a thumbnail, rather than blocking the whole upload on it.
 export function UploadBrochureModal({
   onClose,
   onUploaded,
@@ -18,6 +22,7 @@ export function UploadBrochureModal({
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
+  const [statusText, setStatusText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isBusy = progress !== null;
@@ -42,18 +47,34 @@ export function UploadBrochureModal({
 
     setError(null);
     setProgress(0);
+    const id = crypto.randomUUID().slice(0, 8);
+
     try {
-      const id = crypto.randomUUID().slice(0, 8);
-      const pathname = buildBrochurePathname(id, trimmedTitle);
-      const blob = await upload(pathname, file, {
+      setStatusText("Uploading…");
+      const blob = await upload(buildBrochurePathname(id, trimmedTitle), file, {
         access: "public",
         handleUploadUrl: "/api/brochures/upload",
         onUploadProgress: ({ percentage }) => setProgress(percentage),
       });
-      onUploaded({ id, title: trimmedTitle, url: blob.url, uploadedAt: new Date().toISOString() });
+
+      let thumbnailUrl: string | undefined;
+      try {
+        setStatusText("Generating cover thumbnail…");
+        const thumbBlob = await renderFirstPageToPng(file);
+        const uploadedThumb = await upload(buildThumbnailPathname(id), thumbBlob, {
+          access: "public",
+          handleUploadUrl: "/api/brochures/upload",
+        });
+        thumbnailUrl = uploadedThumb.url;
+      } catch {
+        // Non-fatal — the brochure works fine without a thumbnail.
+      }
+
+      onUploaded({ id, title: trimmedTitle, url: blob.url, thumbnailUrl, uploadedAt: new Date().toISOString() });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed — please try again.");
       setProgress(null);
+      setStatusText(null);
     }
   }
 
@@ -116,7 +137,9 @@ export function UploadBrochureModal({
           disabled={isBusy}
           className="font-sans-ui w-full rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)] disabled:opacity-60"
         >
-          {progress !== null ? `Uploading… ${progress}%` : "Upload"}
+          {progress !== null && progress < 100
+            ? `Uploading… ${progress}%`
+            : statusText ?? "Upload"}
         </button>
       </form>
     </div>

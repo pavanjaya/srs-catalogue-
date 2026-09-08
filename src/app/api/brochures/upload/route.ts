@@ -6,8 +6,11 @@ import { revalidatePath } from "next/cache";
 // Real brochure PDFs run several MB — well past Vercel's fixed 4.5MB
 // request-body limit for Functions, which no config can raise. The file
 // goes straight from the browser to Blob storage; this route only issues
-// the short-lived upload token, never touches the file itself.
-const PATHNAME_RE = /^brochures\/[a-zA-Z0-9_-]+--.+\.pdf$/;
+// the short-lived upload token, never touches the file itself. Also
+// issues tokens for the companion cover-page thumbnail (small, but same
+// client-upload path for one consistent flow).
+const PDF_RE = /^brochures\/[a-zA-Z0-9_-]+--.+\.pdf$/;
+const THUMB_RE = /^brochure-thumbs\/[a-zA-Z0-9_-]+\.png$/;
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody;
@@ -25,12 +28,13 @@ export async function POST(request: Request): Promise<NextResponse> {
         if (!adminSession || adminSession !== process.env.ADMIN_PASSWORD) {
           throw new Error("Not authenticated.");
         }
-        if (!PATHNAME_RE.test(pathname)) {
+        const isThumb = THUMB_RE.test(pathname);
+        if (!PDF_RE.test(pathname) && !isThumb) {
           throw new Error("Invalid brochure path.");
         }
 
         return {
-          allowedContentTypes: ["application/pdf"],
+          allowedContentTypes: isThumb ? ["image/png"] : ["application/pdf"],
           addRandomSuffix: false,
           allowOverwrite: true,
         };

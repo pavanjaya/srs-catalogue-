@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -5,6 +6,7 @@ import { getBrochureById, getBrochures } from "@/lib/brochures";
 import { studio } from "@/lib/studio";
 import { SiteHeader } from "@/components/SiteHeader";
 import { FloatingContact } from "@/components/FloatingContact";
+import { PdfIcon } from "@/components/BrochureManager";
 
 // Always fresh — a brochure can be replaced or removed from the admin
 // panel at any time, and this page shouldn't serve a stale cached link.
@@ -24,23 +26,19 @@ export async function generateMetadata({
   return {
     title: brochure.title,
     description,
-    openGraph: { title: brochure.title, description, type: "website" },
-    twitter: { card: "summary", title: brochure.title, description },
+    openGraph: {
+      title: brochure.title,
+      description,
+      type: "website",
+      images: brochure.thumbnailUrl ? [{ url: brochure.thumbnailUrl }] : undefined,
+    },
+    twitter: {
+      card: brochure.thumbnailUrl ? "summary_large_image" : "summary",
+      title: brochure.title,
+      description,
+      images: brochure.thumbnailUrl ? [brochure.thumbnailUrl] : undefined,
+    },
   };
-}
-
-function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d="M14 3v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 export default async function BrochurePage({
@@ -68,6 +66,20 @@ export default async function BrochurePage({
           The full {brochure.title} catalogue — view or download below.
         </p>
 
+        {brochure.thumbnailUrl && (
+          <div className="mb-8 overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
+            <Image
+              src={brochure.thumbnailUrl}
+              alt={brochure.title}
+              width={1200}
+              height={1200}
+              unoptimized
+              className="h-auto w-full object-cover"
+              priority
+            />
+          </div>
+        )}
+
         <a
           href={brochure.url}
           target="_blank"
@@ -88,12 +100,21 @@ export default async function BrochurePage({
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {others.map((other) => (
-              <Link
-                key={other.id}
-                href={`/brochure/${other.id}`}
-                className="group rounded-xl border border-[var(--line)] bg-white p-5 transition hover:border-[var(--ink)]"
-              >
-                <PdfIcon className="mb-4 h-8 w-8 text-[var(--ash)] transition group-hover:text-[var(--ink)]" />
+              <Link key={other.id} href={`/brochure/${other.id}`} className="group block">
+                <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+                  {other.thumbnailUrl ? (
+                    <Image
+                      src={other.thumbnailUrl}
+                      alt={other.title}
+                      width={400}
+                      height={400}
+                      unoptimized
+                      className="h-full w-full object-cover transition group-hover:opacity-80"
+                    />
+                  ) : (
+                    <PdfIcon className="h-10 w-10 text-[var(--line)]" />
+                  )}
+                </div>
                 <p className="font-sans-ui truncate text-sm text-[var(--ink)]">{other.title}</p>
               </Link>
             ))}
