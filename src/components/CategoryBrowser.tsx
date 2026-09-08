@@ -80,47 +80,71 @@ export function CategoryBrowser({
     );
   }
 
-  // Arrived via a specific shared link: that category is the hero — the
-  // thing that was actually shared stays front and center — with the rest
-  // of the studio's categories browsable just below, so a client isn't
-  // walled into only what was sent them.
+  // Arrived via a specific shared link: that category is the hero, given
+  // the same weight as a single product page (big cover image, its own
+  // full product grid), not a cramped back-link-and-thumbnail treatment.
+  // Every other category follows below — "Explore More", exactly like a
+  // product page's own footer section — so a client isn't walled into
+  // only what was sent them.
   const heroProducts = byCategory.get(active) ?? [];
+  const realCount = heroProducts.filter((p) => !p.placeholder).length;
+  const cover = heroProducts[0];
   const otherCategories = categories.filter((c) => c !== active);
 
   return (
     <div>
-      <button onClick={clear} className="font-sans-ui mb-6 text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
-        ← All categories
-      </button>
-      <h2 className="font-sans-ui mb-6 text-lg text-[var(--ink)]">{active}</h2>
-
-      {heroProducts.length === 0 ? (
-        <p className="font-sans-ui py-6 text-sm text-[var(--ink)]/50">
-          More pieces from this category are on their way.
+      <section className="mb-16">
+        <p className="font-sans-ui mb-3 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+          Catalogue Library
         </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {heroProducts.map((product) => (
-            <Link key={product.slug} href={`${linkPrefix}/${product.slug}`} className="group block">
-              <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={400}
-                  height={400}
-                  className="h-auto w-full object-cover transition group-hover:opacity-80"
-                />
-              </div>
-              <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">{product.name}</p>
-            </Link>
-          ))}
+        <h1 className="mb-4 text-3xl leading-tight sm:text-4xl">{active}</h1>
+        <p className="mb-8 max-w-xl text-[var(--ink)]/70">
+          {realCount > 0
+            ? `${realCount} handcrafted piece${realCount === 1 ? "" : "s"} from the studio's ${active} range.`
+            : "More pieces from this category are on their way."}
+        </p>
+
+        {cover && (
+          <div className="mb-8 overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
+            <Image
+              src={cover.image}
+              alt={active}
+              width={1200}
+              height={1200}
+              className="h-auto w-full object-cover"
+              priority
+            />
+          </div>
+        )}
+
+        {heroProducts.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {heroProducts.map((product) => (
+              <Link key={product.slug} href={`${linkPrefix}/${product.slug}`} className="group block">
+                <div className="mb-2 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    width={400}
+                    height={400}
+                    className="h-auto w-full object-cover transition group-hover:opacity-80"
+                  />
+                </div>
+                <p className="font-sans-ui truncate text-xs text-[var(--ink)]/80">{product.name}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <div className="font-sans-ui mb-6 flex items-baseline justify-between">
+          <h2 className="text-lg">Explore More From Our Collection</h2>
+          <button onClick={clear} className="text-sm text-[var(--ink)]/60 hover:text-[var(--ink)]">
+            View all catalogues →
+          </button>
         </div>
-      )}
-
-      <div className="mt-16 border-t border-[var(--line)] pt-10">
-        <p className="font-sans-ui mb-6 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-          More from the studio
-        </p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {otherCategories.map((category) => (
             <CategoryTile
@@ -131,7 +155,7 @@ export function CategoryBrowser({
             />
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
