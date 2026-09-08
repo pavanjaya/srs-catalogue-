@@ -4,8 +4,17 @@ import { getProductsByCategory, productCategories } from "@/lib/products";
 import { studio } from "@/lib/studio";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
 
-export default function CataloguesPage() {
+export default async function CataloguesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
   const byCategory = getProductsByCategory();
+  // The category-hero view (CategoryBrowser, below) has its own eyebrow,
+  // heading and description once a category is selected — showing this
+  // generic intro above it as well just repeats "Catalogue Library" twice.
+  const { category } = await searchParams;
+  const hasActiveCategory = !!category && productCategories.includes(category as (typeof productCategories)[number]);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
@@ -20,15 +29,19 @@ export default function CataloguesPage() {
           className="mb-6 h-10 w-auto sm:h-12"
         />
         <h1 className="sr-only">{studio.name}</h1>
-        <p className="font-sans-ui mb-2 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          Catalogue Library
-        </p>
-        <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
-          Every piece carries its own story, and its own catalogue. Browse by
-          type below, open one, or share its link — it arrives exactly as
-          itself.
-        </p>
+        {!hasActiveCategory && (
+          <>
+            <p className="font-sans-ui mb-2 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+              Catalogue Library
+            </p>
+            <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
+              Every piece carries its own story, and its own catalogue.
+              Browse by type below, open one, or share its link — it arrives
+              exactly as itself.
+            </p>
+          </>
+        )}
         <a
           href={studio.website}
           target="_blank"
