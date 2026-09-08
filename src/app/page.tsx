@@ -17,7 +17,7 @@ export default async function AdminPage() {
       <div className="font-sans-ui sticky top-0 z-40 flex items-center justify-between bg-[var(--ink)] px-6 py-3 text-sm text-white">
         <span className="flex items-center gap-2 tracking-[0.15em] uppercase">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          Admin Mode
+          Studio
         </span>
         <div className="flex items-center gap-5">
           <Link

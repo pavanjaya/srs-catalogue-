@@ -20,8 +20,9 @@ export default async function AdminLoginPage({
         priority
         className="mb-10 h-10 w-auto"
       />
-      <p className="font-sans-ui mb-6 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-        Admin
+      <p className="font-sans-ui mb-6 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+        Studio
       </p>
       <form action={adminLogin} className="w-full">
         <input type="hidden" name="next" value={next} />
@@ -29,7 +30,7 @@ export default async function AdminLoginPage({
           htmlFor="password"
           className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
         >
-          Admin Password
+          Password
         </label>
         <input
           id="password"
