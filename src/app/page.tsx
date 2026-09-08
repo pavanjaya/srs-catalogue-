@@ -36,7 +36,7 @@ export default async function AdminPage() {
       </div>
 
       <div className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
-        <header className="mb-12">
+        <header className="mb-16">
           <Image
             src="/brand/srs-logo.png"
             alt={studio.name}
@@ -44,10 +44,18 @@ export default async function AdminPage() {
             height={366}
             priority
             unoptimized
-            className="mb-6 h-10 w-auto sm:h-12"
+            className="mb-10 h-10 w-auto sm:h-12"
           />
-          <p className="font-sans-ui max-w-xl text-[var(--ink)]/70">
-            Upload a brochure, share its link — it arrives exactly as itself.
+          <p className="font-sans-ui mb-3 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+            Catalogue Library
+          </p>
+          <h1 className="mb-4 max-w-xl text-3xl leading-tight sm:text-4xl">
+            Where every catalogue lives.
+          </h1>
+          <p className="font-sans-ui max-w-md text-[var(--ink)]/70">
+            Upload a brochure once — its link stays exactly as shared, ready whenever a client
+            asks.
           </p>
         </header>
 

@@ -43,15 +43,14 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
 
   return (
     <div>
-      <div className="mb-10 flex items-start justify-between gap-4">
-        <div>
-          <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-            Brochures
-          </p>
-          <p className="font-sans-ui max-w-md text-sm text-[var(--ink)]/60">
-            Every brochure gets its own link. Upload once, share it, replace it whenever there's a
-            new version.
-          </p>
+      <div className="mb-10 flex items-baseline justify-between gap-4 border-t border-[var(--line)] pt-8">
+        <div className="flex items-baseline gap-3">
+          <h2 className="text-lg text-[var(--ink)]">Library</h2>
+          <span className="font-sans-ui text-xs text-[var(--ink)]/40">
+            {brochures.length === 0
+              ? "empty"
+              : `${brochures.length} catalogue${brochures.length === 1 ? "" : "s"}`}
+          </span>
         </div>
         <button
           onClick={() => setUploadOpen(true)}
@@ -63,7 +62,9 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
 
       {brochures.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--line)] py-20 text-center">
-          <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">No brochures yet.</p>
+          <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">
+            Nothing here yet — the first catalogue starts the library.
+          </p>
           <button
             onClick={() => setUploadOpen(true)}
             className="font-sans-ui text-sm text-[var(--ink)] underline-offset-2 hover:underline"
