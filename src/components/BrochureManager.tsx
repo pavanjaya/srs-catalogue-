@@ -64,23 +64,23 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
         </div>
         <button
           onClick={() => setUploadOpen(true)}
-          className="shadow-btn font-sans-ui shrink-0 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:text-[var(--ink)] active:translate-y-0"
+          className="font-sans-ui shrink-0 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
         >
           + Upload Brochure
         </button>
       </div>
 
       {brochures.length === 0 ? (
-        <div className="shadow-card flex flex-col items-center rounded-2xl bg-white px-6 py-20 text-center">
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-[var(--line)] px-6 py-20 text-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--paper-2)]/70">
             <EmptyLibraryIcon className="h-7 w-7 text-[var(--ink)]/45" />
           </div>
-          <p className="font-sans-ui mb-5 text-sm text-[var(--ink)]/50">
+          <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">
             Nothing here yet — the first catalogue starts the library.
           </p>
           <button
             onClick={() => setUploadOpen(true)}
-            className="shadow-btn font-sans-ui rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--ink)]/30 active:translate-y-0"
+            className="font-sans-ui text-sm font-medium text-[var(--ink)] underline-offset-2 hover:underline"
           >
             Upload your first brochure →
           </button>
@@ -88,12 +88,8 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {brochures.map((brochure) => (
-            <button
-              key={brochure.id}
-              onClick={() => setShareTarget(brochure)}
-              className="group text-left transition-transform duration-300 ease-out hover:-translate-y-1"
-            >
-              <div className="shadow-card shadow-card-hover mb-3 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl bg-white transition-shadow duration-300">
+            <button key={brochure.id} onClick={() => setShareTarget(brochure)} className="group text-left">
+              <div className="mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                 {brochure.thumbnailUrl ? (
                   <Image
                     src={brochure.thumbnailUrl}
@@ -101,7 +97,7 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
                     width={800}
                     height={566}
                     unoptimized
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    className="h-full w-full object-cover transition group-hover:opacity-80"
                   />
                 ) : (
                   <PdfIcon className="h-10 w-10 text-[var(--line)]" />

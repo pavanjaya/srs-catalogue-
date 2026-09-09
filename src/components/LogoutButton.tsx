@@ -46,14 +46,14 @@ export function LogoutButton() {
       </button>
 
       {confirming && (
-        <div className="shadow-modal animate-pop-in font-sans-ui absolute top-full right-0 z-50 mt-3 w-60 rounded-xl border border-white/10 bg-[#141414] p-4 text-left">
+        <div className="font-sans-ui absolute top-full right-0 z-50 mt-3 w-60 rounded-xl border border-white/10 bg-[#141414] p-4 text-left shadow-2xl">
           <p className="mb-3 text-xs leading-relaxed text-white/70">Log out of the studio?</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setConfirming(false)}
               disabled={isPending}
-              className="flex-1 rounded-full border border-white/15 px-3 py-2 text-xs font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:text-white disabled:translate-y-0 disabled:opacity-50"
+              className="flex-1 rounded-full border border-white/15 px-3 py-2 text-xs font-medium text-white/80 transition hover:border-white/30 hover:text-white disabled:opacity-50"
             >
               Cancel
             </button>
@@ -61,7 +61,7 @@ export function LogoutButton() {
               type="button"
               onClick={confirmLogout}
               disabled={isPending}
-              className="flex-1 rounded-full bg-white px-3 py-2 text-xs font-medium text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] disabled:translate-y-0 disabled:opacity-50"
+              className="flex-1 rounded-full bg-white px-3 py-2 text-xs font-medium text-[var(--ink)] transition hover:bg-[var(--accent)] disabled:opacity-50"
             >
               {isPending ? "Logging out…" : "Log out"}
             </button>
