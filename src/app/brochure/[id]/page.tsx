@@ -20,7 +20,7 @@ export async function generateMetadata({
   const brochure = await getBrochureById(id);
   if (!brochure) return {};
 
-  const description = `The full ${brochure.title} catalogue from ${studio.name} — view or download the PDF.`;
+  const description = `A closer look at the ${brochure.title} collection, from ${studio.name}.`;
 
   return {
     title: brochure.title,
@@ -64,13 +64,9 @@ export default async function BrochurePage({
       />
 
       <section className="mb-16">
-        <p className="font-sans-ui mb-3 flex items-center gap-2 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          Catalogue Library
-        </p>
         <h1 className="mb-4 text-3xl leading-tight sm:text-4xl">{brochure.title}</h1>
         <p className="mb-8 max-w-xl text-[var(--ink)]/70">
-          The full {brochure.title} catalogue — view or download below.
+          A closer look at the {brochure.title} collection.
         </p>
 
         {brochure.thumbnailUrl && (
