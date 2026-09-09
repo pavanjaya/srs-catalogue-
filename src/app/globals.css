@@ -32,6 +32,26 @@ body {
   font-family: var(--font-duru), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Duru Sans (the brand's UI font) ships only one real weight (400) — no
+   medium/semibold/bold cut exists to load, so `font-weight` above 400 is
+   inert here (verified: identical rendered glyph width at every value
+   400-700 in this exact stack). A stroke around each glyph is the only
+   way to actually thicken it. Applied wherever `.font-medium` /
+   `.font-semibold` land inside a `.font-sans-ui` context (self or
+   ancestor) — CTAs and card titles — never touches Annapurna SIL
+   headings/body, which have real weight files of their own. */
+.font-sans-ui.font-medium,
+.font-sans-ui .font-medium,
+.font-sans-ui.font-semibold,
+.font-sans-ui .font-semibold {
+  -webkit-text-stroke: 0.5px currentColor;
+}
+
+.font-sans-ui.font-semibold,
+.font-sans-ui .font-semibold {
+  -webkit-text-stroke-width: 0.75px;
+}
+
 /* A gentler alternative to Tailwind's default animate-ping, which resets
    instantly at the top of every loop — visible as an abrupt snap. This
    holds at opacity 0 for the back third of the cycle, so the reset
