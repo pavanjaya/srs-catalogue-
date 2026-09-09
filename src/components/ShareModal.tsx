@@ -147,16 +147,19 @@ export function ShareModal({
       onClick={confirmingRemove ? undefined : onClose}
     >
       <div
-        className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl sm:flex-row"
+        className="flex h-[75vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl sm:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left — a brand-styled preview (own page controls, no native PDF chrome) */}
-        <div className="hidden h-full w-1/2 border-r border-[var(--line)] bg-[var(--paper-2)] sm:block">
+        {/* Left — a brand-styled preview (own page controls, no native PDF chrome).
+            Given the flex-1 share of a wider modal so the brochure page itself
+            reads at real size instead of being squeezed into half a tall box. */}
+        <div className="hidden h-full min-w-0 flex-1 border-r border-[var(--line)] bg-[var(--paper-2)] sm:block">
           <PdfPreview url={brochure.url} title={brochure.title} />
         </div>
 
-        {/* Right — link, message, send */}
-        <div className="flex w-full flex-1 flex-col overflow-y-auto p-6 sm:w-1/2">
+        {/* Right — link, message, send. Fixed width now that the left pane
+            flexes, so it doesn't stretch out on a wide modal. */}
+        <div className="flex w-full flex-1 flex-col overflow-y-auto p-6 sm:w-[380px] sm:flex-none">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="font-sans-ui mb-1 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
