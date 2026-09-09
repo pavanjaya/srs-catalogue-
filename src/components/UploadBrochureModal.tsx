@@ -211,7 +211,7 @@ export function UploadBrochureModal({
             <>
               <UploadCloudIcon className="h-7 w-7 text-[var(--ink)]/50" />
               <p className="text-sm text-[var(--ink)]">
-                <span className="underline underline-offset-2">Click to upload</span> or drag and drop
+                <span className="font-medium underline underline-offset-2">Click to upload</span> or drag and drop
               </p>
               <p className="text-xs text-[var(--ink)]/50">PDF, any size</p>
             </>

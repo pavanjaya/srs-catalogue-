@@ -180,7 +180,7 @@ export function ShareModal({
             href={brochure.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-sans-ui mb-5 text-xs text-[var(--ink)]/60 underline-offset-2 hover:text-[var(--ink)] hover:underline sm:hidden"
+            className="font-sans-ui mb-5 text-xs font-medium text-[var(--ink)]/60 underline-offset-2 hover:text-[var(--ink)] hover:underline sm:hidden"
           >
             Open PDF in a new tab ↗
           </a>
@@ -198,7 +198,7 @@ export function ShareModal({
             />
             <button
               onClick={copyUrl}
-              className={`font-sans-ui flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs transition ${
+              className={`font-sans-ui flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition ${
                 copied
                   ? "border-[var(--ink)] bg-[var(--ink)] text-white"
                   : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
@@ -271,7 +271,7 @@ export function ShareModal({
             ) : (
               <button
                 onClick={() => setConfirmingRemove(true)}
-                className="font-sans-ui flex items-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                className="font-sans-ui flex items-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
               >
                 <TrashIcon className="h-4 w-4" />
                 Remove this brochure

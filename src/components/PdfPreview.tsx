@@ -208,7 +208,7 @@ export function PdfPreview({ url, title }: { url: string; title: string }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-[var(--ink)]"
+              className="font-medium underline underline-offset-2 hover:text-[var(--ink)]"
             >
               Open PDF in a new tab ↗
             </a>

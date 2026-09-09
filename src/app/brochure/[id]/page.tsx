@@ -113,7 +113,7 @@ export default async function BrochurePage({
                     <PdfIcon className="h-10 w-10 text-[var(--line)]" />
                   )}
                 </div>
-                <p className="font-sans-ui truncate text-sm text-[var(--ink)]">{other.title}</p>
+                <p className="font-sans-ui truncate text-sm font-semibold text-[var(--ink)]">{other.title}</p>
               </Link>
             ))}
           </div>

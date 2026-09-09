@@ -59,7 +59,7 @@ export function FloatingContact() {
               target={external ? "_blank" : undefined}
               rel={external ? "noopener noreferrer" : undefined}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-full bg-[var(--accent)] py-2.5 pr-4 pl-3 text-sm text-[var(--ink)] shadow-lg transition hover:bg-[var(--ink)] hover:text-white"
+              className="flex items-center gap-2.5 rounded-full bg-[var(--accent)] py-2.5 pr-4 pl-3 text-sm font-medium text-[var(--ink)] shadow-lg transition hover:bg-[var(--ink)] hover:text-white"
             >
               <Icon className="h-4 w-4 shrink-0" />
               {label}

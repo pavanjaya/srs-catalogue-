@@ -40,7 +40,7 @@ export function LogoutButton() {
       <button
         type="button"
         onClick={() => setConfirming((v) => !v)}
-        className="text-white/70 transition hover:text-white"
+        className="font-medium text-white/70 transition hover:text-white"
       >
         Log out
       </button>
@@ -53,7 +53,7 @@ export function LogoutButton() {
               type="button"
               onClick={() => setConfirming(false)}
               disabled={isPending}
-              className="flex-1 rounded-full border border-white/15 px-3 py-2 text-xs text-white/80 transition hover:border-white/30 hover:text-white disabled:opacity-50"
+              className="flex-1 rounded-full border border-white/15 px-3 py-2 text-xs font-medium text-white/80 transition hover:border-white/30 hover:text-white disabled:opacity-50"
             >
               Cancel
             </button>

@@ -80,7 +80,7 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
           </p>
           <button
             onClick={() => setUploadOpen(true)}
-            className="font-sans-ui text-sm text-[var(--ink)] underline-offset-2 hover:underline"
+            className="font-sans-ui text-sm font-medium text-[var(--ink)] underline-offset-2 hover:underline"
           >
             Upload your first brochure →
           </button>

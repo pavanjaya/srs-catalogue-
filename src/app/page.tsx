@@ -23,7 +23,7 @@ export default async function AdminPage() {
           <Link
             href={studio.website}
             target="_blank"
-            className="text-white/70 hover:text-white"
+            className="font-medium text-white/70 hover:text-white"
           >
             Visit full website ↗
           </Link>
