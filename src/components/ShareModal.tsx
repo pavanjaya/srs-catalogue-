@@ -225,8 +225,7 @@ export function ShareModal({
             id="share-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows={5}
-            className="font-sans-ui mb-5 w-full resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+            className="font-sans-ui mb-5 min-h-[140px] w-full flex-1 resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
           />
 
           <div className="font-sans-ui mb-6 grid grid-cols-2 gap-3">
