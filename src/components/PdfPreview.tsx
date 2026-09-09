@@ -8,75 +8,75 @@ const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.25;
 
 const iconButtonClass =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--ink)]/60 transition hover:bg-[var(--ink)]/5 hover:text-[var(--ink)] disabled:opacity-25 disabled:hover:bg-transparent";
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--ink)]/70 transition hover:bg-[var(--ink)]/8 hover:text-[var(--ink)] disabled:opacity-25 disabled:hover:bg-transparent";
 
 function Divider() {
-  return <span className="mx-1 h-4 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />;
+  return <span className="mx-1.5 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />;
 }
 
-function ChevronLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
+function ChevronLeftIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function ChevronRightIcon({ className = "h-4 w-4" }: { className?: string }) {
+function ChevronRightIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function RotateIcon({ className = "h-4 w-4" }: { className?: string }) {
+function RotateIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
         d="M4 9a8 8 0 1 1 1.35 8.65"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="2.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M4 4v5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 4v5h5" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function ZoomOutIcon({ className = "h-4 w-4" }: { className?: string }) {
+function ZoomOutIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M21 21l-4.3-4.3M8 11h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.25" />
+      <path d="M21 21l-4.3-4.3M8 11h6" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
     </svg>
   );
 }
 
-function ZoomInIcon({ className = "h-4 w-4" }: { className?: string }) {
+function ZoomInIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M21 21l-4.3-4.3M11 8v6M8 11h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.25" />
+      <path d="M21 21l-4.3-4.3M11 8v6M8 11h6" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
     </svg>
   );
 }
 
-function DownloadIcon({ className = "h-4 w-4" }: { className?: string }) {
+function DownloadIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
         d="M12 3v12m0 0 4-4m-4 4-4-4"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="2.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="2.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -220,7 +220,7 @@ export function PdfPreview({ url, title }: { url: string; title: string }) {
       </div>
 
       {!isLoading && !error && (
-        <div className="font-sans-ui flex flex-wrap items-center justify-center gap-1 border-t border-[var(--line)] px-3 py-2.5">
+        <div className="font-sans-ui flex flex-wrap items-center justify-center gap-1.5 border-t border-[var(--line)] px-4 py-3">
           <button type="button" onClick={rotate} aria-label="Rotate" className={iconButtonClass}>
             <RotateIcon />
           </button>
@@ -236,7 +236,7 @@ export function PdfPreview({ url, title }: { url: string; title: string }) {
           >
             <ZoomOutIcon />
           </button>
-          <span className="w-11 shrink-0 text-center text-xs tracking-[0.05em] text-[var(--ash)]">
+          <span className="w-12 shrink-0 text-center text-sm tabular-nums text-[var(--ink)]/70">
             {Math.round(zoom * 100)}%
           </span>
           <button
@@ -261,7 +261,7 @@ export function PdfPreview({ url, title }: { url: string; title: string }) {
               >
                 <ChevronLeftIcon />
               </button>
-              <span className="min-w-[3.25rem] shrink-0 text-center text-xs tracking-[0.1em] text-[var(--ash)]">
+              <span className="min-w-[3.75rem] shrink-0 text-center text-sm tabular-nums text-[var(--ink)]/70">
                 {page} / {numPages}
               </span>
               <button
