@@ -70,7 +70,7 @@ export default async function BrochurePage({
         </p>
 
         {brochure.thumbnailUrl && (
-          <div className="mb-8 overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
+          <div className="shadow-card mb-8 overflow-hidden rounded-2xl bg-white">
             <Image
               src={brochure.thumbnailUrl}
               alt={brochure.title}
@@ -87,7 +87,7 @@ export default async function BrochurePage({
           href={brochure.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-sans-ui inline-flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+          className="shadow-btn font-sans-ui inline-flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:text-[var(--ink)] active:translate-y-0"
         >
           View / Download Catalogue (PDF)
         </a>
@@ -98,8 +98,12 @@ export default async function BrochurePage({
           <h2 className="font-sans-ui mb-6 text-lg">Explore More From Our Collection</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((other) => (
-              <Link key={other.id} href={`/brochure/${other.id}`} className="group block">
-                <div className="mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+              <Link
+                key={other.id}
+                href={`/brochure/${other.id}`}
+                className="group block transition-transform duration-300 ease-out hover:-translate-y-1"
+              >
+                <div className="shadow-card shadow-card-hover mb-3 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl bg-white transition-shadow duration-300">
                   {other.thumbnailUrl ? (
                     <Image
                       src={other.thumbnailUrl}
@@ -107,7 +111,7 @@ export default async function BrochurePage({
                       width={800}
                       height={566}
                       unoptimized
-                      className="h-full w-full object-cover transition group-hover:opacity-80"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                     />
                   ) : (
                     <PdfIcon className="h-10 w-10 text-[var(--line)]" />

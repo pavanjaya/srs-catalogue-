@@ -30,7 +30,7 @@ export default function NotFound() {
       <Link
         href={studio.website}
         target="_blank"
-        className="font-sans-ui rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+        className="shadow-btn font-sans-ui rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:text-[var(--ink)] active:translate-y-0"
       >
         Visit full website ↗
       </Link>

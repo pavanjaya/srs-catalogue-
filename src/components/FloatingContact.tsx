@@ -59,7 +59,7 @@ export function FloatingContact() {
               target={external ? "_blank" : undefined}
               rel={external ? "noopener noreferrer" : undefined}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-full bg-[var(--accent)] py-2.5 pr-4 pl-3 text-sm font-medium text-[var(--ink)] shadow-lg transition hover:bg-[var(--ink)] hover:text-white"
+              className="shadow-popover flex items-center gap-2.5 rounded-full bg-[var(--accent)] py-2.5 pr-4 pl-3 text-sm font-medium text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--ink)] hover:text-white"
             >
               <Icon className="h-4 w-4 shrink-0" />
               {label}
@@ -72,7 +72,7 @@ export function FloatingContact() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close contact options" : "Contact the studio"}
         aria-expanded={open}
-        className="relative flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[var(--accent)] text-[var(--ink)] shadow-lg transition hover:bg-[var(--ink)] hover:text-white"
+        className="shadow-popover relative flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[var(--accent)] text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--ink)] hover:text-white"
       >
         {!open && (
           <span className="animate-pulse-ring absolute inset-0 -z-10 rounded-full bg-[var(--accent)]/60" />

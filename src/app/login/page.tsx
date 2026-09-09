@@ -24,7 +24,7 @@ export default async function AdminLoginPage({
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
         Studio
       </p>
-      <form action={adminLogin} className="w-full">
+      <form action={adminLogin} className="shadow-card w-full rounded-2xl bg-white p-6">
         <input type="hidden" name="next" value={next} />
         <label
           htmlFor="password"
@@ -37,7 +37,7 @@ export default async function AdminLoginPage({
           type="password"
           name="password"
           autoFocus
-          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+          className="font-sans-ui mb-4 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition-shadow focus:border-[var(--ink)]/30 focus:shadow-[0_0_0_3px_rgba(255,173,33,0.18)]"
         />
         {error && (
           <p className="font-sans-ui mb-4 text-sm text-red-800">
@@ -46,7 +46,7 @@ export default async function AdminLoginPage({
         )}
         <button
           type="submit"
-          className="font-sans-ui w-full rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+          className="shadow-btn font-sans-ui w-full rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:text-[var(--ink)] active:translate-y-0"
         >
           Enter
         </button>

@@ -143,11 +143,11 @@ export function ShareModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8"
+      className="animate-backdrop-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8 backdrop-blur-sm"
       onClick={confirmingRemove ? undefined : onClose}
     >
       <div
-        className="flex h-[75vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl sm:flex-row"
+        className="shadow-modal animate-pop-in flex h-[75vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] sm:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left — a brand-styled preview (own page controls, no native PDF chrome).
@@ -194,11 +194,11 @@ export function ShareModal({
               readOnly
               value={url}
               onFocus={(e) => e.target.select()}
-              className="font-sans-ui w-0 flex-1 truncate rounded-lg border border-[var(--line)] bg-white px-3 py-2.5 text-xs text-[var(--ink)]/70 outline-none"
+              className="font-sans-ui w-0 flex-1 truncate rounded-lg border border-[var(--line)] bg-white px-3 py-2.5 text-xs text-[var(--ink)]/70 outline-none transition-shadow focus:border-[var(--ink)]/30 focus:shadow-[0_0_0_3px_rgba(255,173,33,0.18)]"
             />
             <button
               onClick={copyUrl}
-              className={`font-sans-ui flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition ${
+              className={`shadow-btn font-sans-ui flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
                 copied
                   ? "border-[var(--ink)] bg-[var(--ink)] text-white"
                   : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
@@ -225,20 +225,20 @@ export function ShareModal({
             id="share-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="font-sans-ui mb-5 min-h-[140px] w-full flex-1 resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+            className="font-sans-ui mb-5 min-h-[140px] w-full flex-1 resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition-shadow focus:border-[var(--ink)]/30 focus:shadow-[0_0_0_3px_rgba(255,173,33,0.18)]"
           />
 
           <div className="font-sans-ui mb-6 grid grid-cols-2 gap-3">
             <button
               onClick={sendWhatsApp}
-              className="flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+              className="shadow-btn flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--accent)] hover:text-[var(--ink)] active:translate-y-0"
             >
               <WhatsAppIcon className="h-5 w-5 shrink-0" />
               WhatsApp
             </button>
             <button
               onClick={sendEmail}
-              className="flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]"
+              className="shadow-btn flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-medium text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--ink)]/30 active:translate-y-0"
             >
               <EmailIcon className="h-5 w-5 shrink-0" />
               Email
@@ -247,7 +247,7 @@ export function ShareModal({
 
           <div className="mt-auto border-t border-[var(--line)] pt-5">
             {confirmingRemove ? (
-              <div className="rounded-xl bg-red-50 p-4">
+              <div className="shadow-card animate-pop-in rounded-xl bg-red-50 p-4">
                 <p className="font-sans-ui mb-3 text-sm text-red-900">
                   Remove &ldquo;{brochure.title}&rdquo;? This can&apos;t be undone.
                 </p>
@@ -255,14 +255,14 @@ export function ShareModal({
                   <button
                     onClick={() => setConfirmingRemove(false)}
                     disabled={isDeleting}
-                    className="flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)] disabled:opacity-50"
+                    className="shadow-btn flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--ink)] disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmRemove}
                     disabled={isDeleting}
-                    className="flex-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+                    className="shadow-btn flex-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50"
                   >
                     {isDeleting ? "Removing…" : "Remove"}
                   </button>
@@ -271,7 +271,7 @@ export function ShareModal({
             ) : (
               <button
                 onClick={() => setConfirmingRemove(true)}
-                className="font-sans-ui flex items-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                className="font-sans-ui flex items-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50"
               >
                 <TrashIcon className="h-4 w-4" />
                 Remove this brochure
