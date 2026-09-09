@@ -53,7 +53,7 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
 
   return (
     <div>
-      <div className="mb-10 flex items-baseline justify-between gap-4 border-t border-[var(--line)] pt-8">
+      <div className="mb-8 flex items-baseline justify-between gap-4 border-t border-[var(--line)] pt-6">
         <div className="flex items-baseline gap-3">
           <h2 className="text-lg text-[var(--ink)]">Library</h2>
           <span className="font-sans-ui text-xs text-[var(--ink)]/40">
