@@ -20,6 +20,16 @@ export function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
   );
 }
 
+function EmptyLibraryIcon({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4" y="8" width="13" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7.5 5h11a1.5 1.5 0 0 1 1.5 1.5V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M7.5 13h7M7.5 16.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -61,7 +71,10 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
       </div>
 
       {brochures.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--line)] py-20 text-center">
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-[var(--line)] px-6 py-20 text-center">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--paper-2)]/70">
+            <EmptyLibraryIcon className="h-7 w-7 text-[var(--ink)]/45" />
+          </div>
           <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">
             Nothing here yet — the first catalogue starts the library.
           </p>
