@@ -103,8 +103,8 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
                   <PdfIcon className="h-10 w-10 text-[var(--line)]" />
                 )}
               </div>
-              <p className="font-sans-ui truncate text-sm text-[var(--ink)]">{brochure.title}</p>
-              <p className="font-sans-ui text-xs text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
+              <p className="font-sans-ui truncate text-sm font-semibold text-[var(--ink)]">{brochure.title}</p>
+              <p className="font-sans-ui text-xs font-medium text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
             </button>
           ))}
         </div>
