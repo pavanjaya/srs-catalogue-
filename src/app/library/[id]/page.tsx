@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getBrochureById, getBrochures } from "@/lib/brochures";
+import { getBrochureById } from "@/lib/brochures";
 import { BrochureSharePage } from "@/components/BrochureSharePage";
 
 // Admin-only by default — this path isn't in proxy.ts's public/client
@@ -12,10 +12,8 @@ export default async function LibraryBrochurePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [brochure, all] = await Promise.all([getBrochureById(id), getBrochures()]);
+  const brochure = await getBrochureById(id);
   if (!brochure) notFound();
 
-  const allTags = Array.from(new Set(all.flatMap((b) => b.tags))).sort((a, b) => a.localeCompare(b));
-
-  return <BrochureSharePage brochure={brochure} allTags={allTags} />;
+  return <BrochureSharePage brochure={brochure} />;
 }

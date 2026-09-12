@@ -4,10 +4,9 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { deleteBrochure, updateBrochureTags } from "@/app/actions/brochures";
+import { deleteBrochure } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
 import { PdfPreview } from "@/components/PdfPreview";
-import { TagInput } from "@/components/TagInput";
 
 function CopyIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -60,14 +59,6 @@ function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -82,13 +73,12 @@ function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
 // column squeezed next to a preview, in a dimmed popup, worked against
 // it. This gets its own page and URL instead: a bigger preview, a
 // calmer compose column, no backdrop.
-export function BrochureSharePage({
-  brochure,
-  allTags,
-}: {
-  brochure: Brochure;
-  allTags: string[];
-}) {
+//
+// Tags and the website link are deliberately absent here — those are
+// organizing decisions made once at upload, not part of the act of
+// sharing, and having them on this page pulled focus from the thing it's
+// actually for.
+export function BrochureSharePage({ brochure }: { brochure: Brochure }) {
   const router = useRouter();
   const [message, setMessage] = useState(
     `Hi, sharing the ${brochure.title} catalogue from Shailesh Rajput Studio.\n\nTake a look whenever suits you — happy to talk through any piece that catches your eye.`,
@@ -98,12 +88,6 @@ export function BrochureSharePage({
   const [copyFailed, setCopyFailed] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
-  const [tags, setTags] = useState<string[]>(brochure.tags);
-  const [tagsDirty, setTagsDirty] = useState(false);
-  const [isSavingTags, startTagsTransition] = useTransition();
-  const [organizeOpen, setOrganizeOpen] = useState(
-    () => brochure.tags.length > 0 || !!brochure.websiteLink,
-  );
   const urlInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -118,26 +102,6 @@ export function BrochureSharePage({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [confirmingRemove]);
-
-  function handleTagsChange(next: string[]) {
-    setTags(next);
-    setTagsDirty(true);
-  }
-
-  function saveTags() {
-    startTagsTransition(async () => {
-      const saved = await updateBrochureTags(brochure.id, tags);
-      setTags(saved);
-      setTagsDirty(false);
-    });
-  }
-
-  function organizeSummary(): string {
-    const parts: string[] = [];
-    if (tags.length > 0) parts.push(`${tags.length} tag${tags.length === 1 ? "" : "s"}`);
-    if (brochure.websiteLink) parts.push(brochure.websiteLink.label);
-    return parts.length > 0 ? parts.join(" · ") : "Tags, website link";
-  }
 
   async function copyUrl() {
     setCopyFailed(false);
@@ -232,60 +196,11 @@ export function BrochureSharePage({
             </button>
           </div>
           {copyFailed && (
-            <p className="font-sans-ui mb-3 text-xs text-red-600">
+            <p className="font-sans-ui mb-5 text-xs text-red-600">
               Couldn&apos;t copy automatically — the link is selected above, press ⌘C / Ctrl+C to
               copy it.
             </p>
           )}
-
-          <div className="font-sans-ui mb-5 rounded-lg border border-[var(--line)]">
-            <button
-              type="button"
-              onClick={() => setOrganizeOpen((v) => !v)}
-              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
-            >
-              <span className="shrink-0 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-                Organize
-              </span>
-              <span className="flex min-w-0 items-center gap-1.5 text-xs text-[var(--ink)]/50">
-                <span className="truncate">{organizeSummary()}</span>
-                <ChevronIcon
-                  className={`h-3.5 w-3.5 shrink-0 transition-transform ${organizeOpen ? "rotate-180" : ""}`}
-                />
-              </span>
-            </button>
-
-            {organizeOpen && (
-              <div className="border-t border-[var(--line)] p-4">
-                <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-                  Tags
-                </label>
-                <TagInput tags={tags} onChange={handleTagsChange} suggestions={allTags} />
-                <p className="mt-1.5 mb-2 shrink-0 truncate text-xs text-[var(--ink)]/50">
-                  Shared tags control cross-sell in &ldquo;Explore More.&rdquo;
-                </p>
-                {tagsDirty && (
-                  <button
-                    onClick={saveTags}
-                    disabled={isSavingTags}
-                    className="mb-4 w-full rounded-full border border-[var(--ink)] px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white disabled:opacity-50"
-                  >
-                    {isSavingTags ? "Saving tags…" : "Save tags"}
-                  </button>
-                )}
-
-                <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-                  Website Link
-                </label>
-                <p className="text-sm text-[var(--ink)]">
-                  {brochure.websiteLink ? brochure.websiteLink.label : "No Website Link"}
-                </p>
-                <p className="mt-1.5 shrink-0 text-xs text-[var(--ink)]/50">
-                  Set at upload — not editable here.
-                </p>
-              </div>
-            )}
-          </div>
 
           <label
             htmlFor="share-message"
