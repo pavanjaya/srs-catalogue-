@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { deleteBrochure } from "@/app/actions/brochures";
+import { deleteBrochure, updateBrochureTags } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
 import { PdfPreview } from "@/components/PdfPreview";
+import { TagInput } from "@/components/TagInput";
 
 function CloseIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -73,12 +74,16 @@ function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
 // BrochureManager.
 export function ShareModal({
   brochure,
+  allTags,
   onClose,
   onDeleted,
+  onTagsSaved,
 }: {
   brochure: Brochure;
+  allTags: string[];
   onClose: () => void;
   onDeleted: () => void;
+  onTagsSaved: (tags: string[]) => void;
 }) {
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
@@ -86,6 +91,9 @@ export function ShareModal({
   const [copyFailed, setCopyFailed] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [isDeleting, startTransition] = useTransition();
+  const [tags, setTags] = useState<string[]>(brochure.tags);
+  const [tagsDirty, setTagsDirty] = useState(false);
+  const [isSavingTags, startTagsTransition] = useTransition();
   const urlInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -100,7 +108,23 @@ export function ShareModal({
     );
     setCopied(false);
     setConfirmingRemove(false);
+    setTags(brochure.tags);
+    setTagsDirty(false);
   }, [brochure]);
+
+  function handleTagsChange(next: string[]) {
+    setTags(next);
+    setTagsDirty(true);
+  }
+
+  function saveTags() {
+    startTagsTransition(async () => {
+      const saved = await updateBrochureTags(brochure.id, tags);
+      setTags(saved);
+      setTagsDirty(false);
+      onTagsSaved(saved);
+    });
+  }
 
   // Close on Escape — but not while the destructive confirm step is
   // showing, so it can't be dismissed by accident mid-decision.
@@ -237,6 +261,24 @@ export function ShareModal({
               Couldn&apos;t copy automatically — the link is selected above, press ⌘C / Ctrl+C to
               copy it.
             </p>
+          )}
+
+          <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+            Tags
+          </label>
+          <TagInput tags={tags} onChange={handleTagsChange} suggestions={allTags} />
+          <p className="font-sans-ui mt-1.5 mb-2 text-xs text-[var(--ink)]/50">
+            Only brochures sharing a tag appear in each other&apos;s &ldquo;Explore More&rdquo; —
+            useful for keeping regional pricing separate.
+          </p>
+          {tagsDirty && (
+            <button
+              onClick={saveTags}
+              disabled={isSavingTags}
+              className="font-sans-ui mb-3 w-full rounded-full border border-[var(--ink)] px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white disabled:opacity-50"
+            >
+              {isSavingTags ? "Saving tags…" : "Save tags"}
+            </button>
           )}
 
           <label

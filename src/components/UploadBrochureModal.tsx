@@ -5,6 +5,8 @@ import { upload } from "@vercel/blob/client";
 import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
 import { PdfIcon } from "@/components/BrochureManager";
+import { TagInput } from "@/components/TagInput";
+import { updateBrochureTags } from "@/app/actions/brochures";
 
 function UploadCloudIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
@@ -39,13 +41,16 @@ function formatSize(bytes: number) {
 // that step fails for any reason, the brochure still gets created, just
 // without a thumbnail, rather than blocking the whole upload on it.
 export function UploadBrochureModal({
+  allTags,
   onClose,
   onUploaded,
 }: {
+  allTags: string[];
   onClose: () => void;
   onUploaded: (brochure: Brochure) => void;
 }) {
   const [title, setTitle] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
@@ -126,7 +131,25 @@ export function UploadBrochureModal({
         // Non-fatal — the brochure works fine without a thumbnail.
       }
 
-      onUploaded({ id, title: trimmedTitle, url: blob.url, thumbnailUrl, uploadedAt: new Date().toISOString() });
+      let savedTags: string[] = [];
+      if (tags.length > 0) {
+        try {
+          setStatusText("Saving tags…");
+          savedTags = await updateBrochureTags(id, tags);
+        } catch {
+          // Non-fatal — the brochure works fine without tags, they can be
+          // added afterward from the share modal.
+        }
+      }
+
+      onUploaded({
+        id,
+        title: trimmedTitle,
+        url: blob.url,
+        thumbnailUrl,
+        tags: savedTags,
+        uploadedAt: new Date().toISOString(),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed — please try again.");
       setProgress(null);
@@ -174,6 +197,13 @@ export function UploadBrochureModal({
           disabled={isBusy}
           className="font-sans-ui mb-5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
         />
+
+        <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+          Tags <span className="normal-case text-[var(--ink)]/40">(optional — e.g. region or pricing)</span>
+        </label>
+        <div className="mb-5">
+          <TagInput tags={tags} onChange={setTags} suggestions={allTags} />
+        </div>
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
           PDF File

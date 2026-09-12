@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getBrochureById, getBrochures } from "@/lib/brochures";
+import { getBrochureById, getBrochures, shareTag } from "@/lib/brochures";
 import { studio } from "@/lib/studio";
 import { FloatingContact } from "@/components/FloatingContact";
 import { PdfIcon } from "@/components/BrochureManager";
@@ -49,7 +49,7 @@ export default async function BrochurePage({
   const [brochure, all] = await Promise.all([getBrochureById(id), getBrochures()]);
   if (!brochure) notFound();
 
-  const others = all.filter((b) => b.id !== id).slice(0, 8);
+  const others = all.filter((b) => b.id !== id && shareTag(brochure.tags, b.tags)).slice(0, 8);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 sm:py-14">

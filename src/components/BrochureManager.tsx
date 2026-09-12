@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Brochure } from "@/lib/brochures";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
 import { ShareModal } from "@/components/ShareModal";
@@ -41,6 +41,14 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
   const [uploadOpen, setUploadOpen] = useState(false);
   const [shareTarget, setShareTarget] = useState<Brochure | null>(null);
 
+  // Every distinct tag already in use, for the tag-input's suggestions —
+  // recomputed whenever the library changes.
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    for (const b of brochures) for (const t of b.tags) set.add(t);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [brochures]);
+
   function handleUploaded(brochure: Brochure) {
     setBrochures((prev) => [brochure, ...prev]);
     setUploadOpen(false);
@@ -49,6 +57,11 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
   function handleDeleted(id: string) {
     setBrochures((prev) => prev.filter((b) => b.id !== id));
     setShareTarget(null);
+  }
+
+  function handleTagsSaved(id: string, tags: string[]) {
+    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, tags } : b)));
+    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, tags } : prev));
   }
 
   return (
@@ -105,19 +118,37 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
               </div>
               <p className="font-sans-ui truncate text-sm font-semibold text-[var(--ink)]">{brochure.title}</p>
               <p className="font-sans-ui text-xs font-medium text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
+              {brochure.tags.length > 0 && (
+                <p className="font-sans-ui mt-1.5 flex flex-wrap gap-1">
+                  {brochure.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[10px] font-medium text-[var(--ink)]/60"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </p>
+              )}
             </button>
           ))}
         </div>
       )}
 
       {uploadOpen && (
-        <UploadBrochureModal onClose={() => setUploadOpen(false)} onUploaded={handleUploaded} />
+        <UploadBrochureModal
+          allTags={allTags}
+          onClose={() => setUploadOpen(false)}
+          onUploaded={handleUploaded}
+        />
       )}
       {shareTarget && (
         <ShareModal
           brochure={shareTarget}
+          allTags={allTags}
           onClose={() => setShareTarget(null)}
           onDeleted={() => handleDeleted(shareTarget.id)}
+          onTagsSaved={(tags) => handleTagsSaved(shareTarget.id, tags)}
         />
       )}
     </div>
