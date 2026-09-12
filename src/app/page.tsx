@@ -39,6 +39,18 @@ export default async function AdminPage() {
         />
 
         <BrochureManager initialBrochures={brochures} websiteLinkOptions={websiteLinkOptions} />
+
+        <p className="font-sans-ui mt-16 border-t border-[var(--line)] pt-6 text-center text-xs text-[var(--ink)]/40">
+          © {new Date().getFullYear()} {studio.name} ·{" "}
+          <a
+            href={studio.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--ink)]/70"
+          >
+            {studio.website.replace(/^https?:\/\//, "")}
+          </a>
+        </p>
       </div>
     </>
   );
