@@ -5,7 +5,7 @@ import { upload } from "@vercel/blob/client";
 import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
 import type { WebsiteLink, WebsiteLinkOptions } from "@/lib/websiteLink";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
-import { PdfIcon } from "@/components/BrochureManager";
+import { PdfIcon } from "@/components/PdfIcon";
 import { TagInput } from "@/components/TagInput";
 import { updateBrochureTags, updateBrochureWebsiteLink } from "@/app/actions/brochures";
 

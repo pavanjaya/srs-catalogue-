@@ -6,7 +6,7 @@ import { getBrochureById, getBrochures, shareTag } from "@/lib/brochures";
 import { buildWebsiteLinkHref } from "@/lib/websiteLink";
 import { studio } from "@/lib/studio";
 import { FloatingContact } from "@/components/FloatingContact";
-import { PdfIcon } from "@/components/BrochureManager";
+import { PdfIcon } from "@/components/PdfIcon";
 
 // Always fresh — a brochure can be replaced or removed from the admin
 // panel at any time, and this page shouldn't serve a stale cached link.

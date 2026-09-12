@@ -1,25 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Brochure } from "@/lib/brochures";
 import type { WebsiteLinkOptions } from "@/lib/websiteLink";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
-
-export function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d="M14 3v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
+import { BrochureCard } from "@/components/BrochureCard";
 
 function EmptyLibraryIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (
@@ -29,10 +14,6 @@ function EmptyLibraryIcon({ className = "h-7 w-7" }: { className?: string }) {
       <path d="M7.5 13h7M7.5 16.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // The whole admin homepage: nothing until you upload something, then every
@@ -60,6 +41,14 @@ export function BrochureManager({
   function handleUploaded(brochure: Brochure) {
     setBrochures((prev) => [brochure, ...prev]);
     setUploadOpen(false);
+  }
+
+  function handleDeleted(id: string) {
+    setBrochures((prev) => prev.filter((b) => b.id !== id));
+  }
+
+  function handleTagsSaved(id: string, tags: string[]) {
+    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, tags } : b)));
   }
 
   return (
@@ -99,36 +88,13 @@ export function BrochureManager({
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {brochures.map((brochure) => (
-            <Link key={brochure.id} href={`/library/${brochure.id}`} className="group block text-left">
-              <div className="mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                {brochure.thumbnailUrl ? (
-                  <Image
-                    src={brochure.thumbnailUrl}
-                    alt={brochure.title}
-                    width={800}
-                    height={566}
-                    unoptimized
-                    className="h-full w-full object-cover transition group-hover:opacity-80"
-                  />
-                ) : (
-                  <PdfIcon className="h-10 w-10 text-[var(--line)]" />
-                )}
-              </div>
-              <p className="font-sans-ui truncate text-sm font-semibold text-[var(--ink)]">{brochure.title}</p>
-              <p className="font-sans-ui text-xs font-medium text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
-              {brochure.tags.length > 0 && (
-                <p className="font-sans-ui mt-1.5 flex flex-wrap gap-1">
-                  {brochure.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[10px] font-medium text-[var(--ink)]/60"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </p>
-              )}
-            </Link>
+            <BrochureCard
+              key={brochure.id}
+              brochure={brochure}
+              allTags={allTags}
+              onDeleted={handleDeleted}
+              onTagsSaved={handleTagsSaved}
+            />
           ))}
         </div>
       )}
