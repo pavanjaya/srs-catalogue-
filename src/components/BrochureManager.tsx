@@ -36,7 +36,13 @@ function formatDate(iso: string) {
 
 // The whole admin homepage: nothing until you upload something, then every
 // brochure is a card — click it to share (or remove) via ShareModal.
-export function BrochureManager({ initialBrochures }: { initialBrochures: Brochure[] }) {
+export function BrochureManager({
+  initialBrochures,
+  websiteCategories,
+}: {
+  initialBrochures: Brochure[];
+  websiteCategories: string[];
+}) {
   const [brochures, setBrochures] = useState(initialBrochures);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [shareTarget, setShareTarget] = useState<Brochure | null>(null);
@@ -62,6 +68,11 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
   function handleTagsSaved(id: string, tags: string[]) {
     setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, tags } : b)));
     setShareTarget((prev) => (prev && prev.id === id ? { ...prev, tags } : prev));
+  }
+
+  function handleCategorySaved(id: string, websiteCategory: string | null) {
+    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, websiteCategory } : b)));
+    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, websiteCategory } : prev));
   }
 
   return (
@@ -138,6 +149,7 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
       {uploadOpen && (
         <UploadBrochureModal
           allTags={allTags}
+          websiteCategories={websiteCategories}
           onClose={() => setUploadOpen(false)}
           onUploaded={handleUploaded}
         />
@@ -146,9 +158,11 @@ export function BrochureManager({ initialBrochures }: { initialBrochures: Brochu
         <ShareModal
           brochure={shareTarget}
           allTags={allTags}
+          websiteCategories={websiteCategories}
           onClose={() => setShareTarget(null)}
           onDeleted={() => handleDeleted(shareTarget.id)}
           onTagsSaved={(tags) => handleTagsSaved(shareTarget.id, tags)}
+          onCategorySaved={(category) => handleCategorySaved(shareTarget.id, category)}
         />
       )}
     </div>

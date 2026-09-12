@@ -23,14 +23,17 @@ export type Brochure = {
   url: string;
   thumbnailUrl?: string;
   tags: string[];
+  websiteCategory: string | null;
   uploadedAt: string; // ISO
 };
 
 const PDF_RE = /^brochures\/([a-zA-Z0-9_-]+)--(.+)\.pdf$/;
 const THUMB_RE = /^brochure-thumbs\/([a-zA-Z0-9_-]+)\.png$/;
 const TAGS_RE = /^brochure-tags\/([a-zA-Z0-9_-]+)--(.*)\.json$/;
+const CATEGORY_RE = /^brochure-category\/([a-zA-Z0-9_-]+)--(.*)\.json$/;
 
 export const TAGS_PREFIX = "brochure-tags/";
+export const CATEGORY_PREFIX = "brochure-category/";
 
 export function buildBrochurePathname(id: string, title: string): string {
   return `brochures/${id}--${encodeURIComponent(title)}.pdf`;
@@ -42,6 +45,12 @@ export function buildThumbnailPathname(id: string): string {
 
 export function buildTagsPathname(id: string, tags: string[]): string {
   return `${TAGS_PREFIX}${id}--${encodeURIComponent(tags.join(","))}.json`;
+}
+
+// The main website's matching /products category, e.g. "Table Lights" —
+// stored the same pathname-encoding way as tags, but single-valued.
+export function buildCategoryPathname(id: string, category: string): string {
+  return `${CATEGORY_PREFIX}${id}--${encodeURIComponent(category)}.json`;
 }
 
 // Trims, drops empties, and dedupes case-insensitively (keeping the first
@@ -75,10 +84,11 @@ export function shareTag(a: string[], b: string[]): boolean {
 export async function getBrochures(): Promise<Brochure[]> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
 
-  const [pdfList, thumbList, tagsList] = await Promise.all([
+  const [pdfList, thumbList, tagsList, categoryList] = await Promise.all([
     list({ prefix: "brochures/", limit: 1000 }),
     list({ prefix: "brochure-thumbs/", limit: 1000 }),
     list({ prefix: TAGS_PREFIX, limit: 1000 }),
+    list({ prefix: CATEGORY_PREFIX, limit: 1000 }),
   ]);
 
   const thumbById = new Map<string, string>();
@@ -94,6 +104,18 @@ export async function getBrochures(): Promise<Brochure[]> {
     try {
       const decoded = decodeURIComponent(match[2]);
       tagsById.set(match[1], decoded ? decoded.split(",") : []);
+    } catch {
+      continue;
+    }
+  }
+
+  const categoryById = new Map<string, string>();
+  for (const blob of categoryList.blobs) {
+    const match = blob.pathname.match(CATEGORY_RE);
+    if (!match) continue;
+    try {
+      const decoded = decodeURIComponent(match[2]);
+      if (decoded) categoryById.set(match[1], decoded);
     } catch {
       continue;
     }
@@ -115,6 +137,7 @@ export async function getBrochures(): Promise<Brochure[]> {
       url: blob.url,
       thumbnailUrl: thumbById.get(match[1]),
       tags: tagsById.get(match[1]) ?? [],
+      websiteCategory: categoryById.get(match[1]) ?? null,
       uploadedAt: new Date(blob.uploadedAt).toISOString(),
     });
   }

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { studio } from "@/lib/studio";
 import { getBrochures } from "@/lib/brochures";
+import { getWebsiteCategories } from "@/lib/websiteCategories";
 import { BrochureManager } from "@/components/BrochureManager";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ChangePasswordButton } from "@/components/ChangePasswordButton";
@@ -11,14 +12,15 @@ import { ChangePasswordButton } from "@/components/ChangePasswordButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const brochures = await getBrochures();
+  const [brochures, websiteCategories] = await Promise.all([getBrochures(), getWebsiteCategories()]);
 
   return (
     <>
       <div className="font-sans-ui sticky top-0 z-40 flex items-center justify-between bg-[var(--ink)] px-6 py-3 text-sm text-white">
         <span className="flex items-center gap-2 tracking-[0.15em] uppercase">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          Studio
+          <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+          <span className="sm:hidden">SRS Hub</span>
+          <span className="hidden sm:inline">SRS Catalogue Hub</span>
         </span>
         <div className="flex items-center gap-5">
           <Link
@@ -57,7 +59,7 @@ export default async function AdminPage() {
           </p>
         </header>
 
-        <BrochureManager initialBrochures={brochures} />
+        <BrochureManager initialBrochures={brochures} websiteCategories={websiteCategories} />
       </div>
     </>
   );

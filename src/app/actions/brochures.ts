@@ -2,7 +2,15 @@
 
 import { del, list, put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
-import { buildThumbnailPathname, buildTagsPathname, normalizeTags, TAGS_PREFIX } from "@/lib/brochures";
+import {
+  buildThumbnailPathname,
+  buildTagsPathname,
+  buildCategoryPathname,
+  normalizeTags,
+  TAGS_PREFIX,
+  CATEGORY_PREFIX,
+} from "@/lib/brochures";
+import { getWebsiteCategories } from "@/lib/websiteCategories";
 
 // Deleting sends no file body, so it stays a normal Server Action — only
 // uploads need the client-upload route (src/app/api/brochures/upload),
@@ -12,13 +20,17 @@ export async function deleteBrochure(pdfPathname: string, id: string): Promise<v
     throw new Error("Invalid brochure.");
   }
   // del() doesn't error when a path doesn't exist, so it's safe to always
-  // try the thumbnail (and any tags blob) too even for brochures that
-  // never got one.
-  const existingTags = await list({ prefix: `${TAGS_PREFIX}${id}--` });
+  // try the thumbnail (and any tags/category blob) too even for brochures
+  // that never got one.
+  const [existingTags, existingCategory] = await Promise.all([
+    list({ prefix: `${TAGS_PREFIX}${id}--` }),
+    list({ prefix: `${CATEGORY_PREFIX}${id}--` }),
+  ]);
   await Promise.all([
     del(pdfPathname),
     del(buildThumbnailPathname(id)),
     ...existingTags.blobs.map((b) => del(b.pathname)),
+    ...existingCategory.blobs.map((b) => del(b.pathname)),
   ]);
   revalidatePath("/");
 }
@@ -43,4 +55,28 @@ export async function updateBrochureTags(id: string, rawTags: string[]): Promise
   revalidatePath("/");
   revalidatePath(`/brochure/${id}`);
   return tags;
+}
+
+// Same pathname-encoding pattern as tags, but single-valued — pass null
+// (or an empty/unrecognized string) to clear it. Restricted to the fixed
+// list in lib/websiteCategories.ts rather than freeform, since this has
+// to exactly match a tab label on the main website to be useful.
+export async function updateBrochureCategory(id: string, category: string | null): Promise<string | null> {
+  const known = await getWebsiteCategories();
+  const valid = category && known.includes(category) ? category : null;
+
+  const existing = await list({ prefix: `${CATEGORY_PREFIX}${id}--` });
+  await Promise.all(existing.blobs.map((b) => del(b.pathname)));
+
+  if (valid) {
+    await put(buildCategoryPathname(id, valid), JSON.stringify({ category: valid }), {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/brochure/${id}`);
+  return valid;
 }

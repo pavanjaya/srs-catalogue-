@@ -6,7 +6,7 @@ import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
 import { PdfIcon } from "@/components/BrochureManager";
 import { TagInput } from "@/components/TagInput";
-import { updateBrochureTags } from "@/app/actions/brochures";
+import { updateBrochureTags, updateBrochureCategory } from "@/app/actions/brochures";
 
 function UploadCloudIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
@@ -42,15 +42,18 @@ function formatSize(bytes: number) {
 // without a thumbnail, rather than blocking the whole upload on it.
 export function UploadBrochureModal({
   allTags,
+  websiteCategories,
   onClose,
   onUploaded,
 }: {
   allTags: string[];
+  websiteCategories: string[];
   onClose: () => void;
   onUploaded: (brochure: Brochure) => void;
 }) {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
@@ -142,12 +145,23 @@ export function UploadBrochureModal({
         }
       }
 
+      let savedCategory: string | null = null;
+      if (category) {
+        try {
+          setStatusText("Saving category…");
+          savedCategory = await updateBrochureCategory(id, category);
+        } catch {
+          // Non-fatal — can be set afterward from the share modal.
+        }
+      }
+
       onUploaded({
         id,
         title: trimmedTitle,
         url: blob.url,
         thumbnailUrl,
         tags: savedTags,
+        websiteCategory: savedCategory,
         uploadedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -204,6 +218,28 @@ export function UploadBrochureModal({
         <div className="mb-5">
           <TagInput tags={tags} onChange={setTags} suggestions={allTags} />
         </div>
+
+        <label
+          htmlFor="brochure-category"
+          className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
+        >
+          Website Category{" "}
+          <span className="normal-case text-[var(--ink)]/40">(optional)</span>
+        </label>
+        <select
+          id="brochure-category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          disabled={isBusy}
+          className="font-sans-ui mb-5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
+        >
+          <option value="">None</option>
+          {websiteCategories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
           PDF File

@@ -83,14 +83,26 @@ export default async function BrochurePage({
           </div>
         )}
 
-        <a
-          href={brochure.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-sans-ui inline-flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
-        >
-          View / Download Catalogue (PDF)
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={brochure.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-sans-ui inline-flex items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent)] hover:text-[var(--ink)]"
+          >
+            View / Download Catalogue (PDF)
+          </a>
+          {brochure.websiteCategory && (
+            <a
+              href={`${studio.website}/products?category=${encodeURIComponent(brochure.websiteCategory)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-sans-ui inline-flex items-center justify-center gap-2 rounded-full border border-[var(--ink)] px-6 py-3 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white"
+            >
+              Explore {brochure.websiteCategory} on Our Website
+            </a>
+          )}
+        </div>
       </section>
 
       {others.length > 0 && (

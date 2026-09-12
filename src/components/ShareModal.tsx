@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { deleteBrochure, updateBrochureTags } from "@/app/actions/brochures";
+import { deleteBrochure, updateBrochureTags, updateBrochureCategory } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
 import { PdfPreview } from "@/components/PdfPreview";
 import { TagInput } from "@/components/TagInput";
@@ -75,15 +75,19 @@ function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
 export function ShareModal({
   brochure,
   allTags,
+  websiteCategories,
   onClose,
   onDeleted,
   onTagsSaved,
+  onCategorySaved,
 }: {
   brochure: Brochure;
   allTags: string[];
+  websiteCategories: string[];
   onClose: () => void;
   onDeleted: () => void;
   onTagsSaved: (tags: string[]) => void;
+  onCategorySaved: (category: string | null) => void;
 }) {
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
@@ -94,6 +98,8 @@ export function ShareModal({
   const [tags, setTags] = useState<string[]>(brochure.tags);
   const [tagsDirty, setTagsDirty] = useState(false);
   const [isSavingTags, startTagsTransition] = useTransition();
+  const [category, setCategory] = useState<string | null>(brochure.websiteCategory);
+  const [isSavingCategory, startCategoryTransition] = useTransition();
   const urlInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -110,11 +116,22 @@ export function ShareModal({
     setConfirmingRemove(false);
     setTags(brochure.tags);
     setTagsDirty(false);
+    setCategory(brochure.websiteCategory);
   }, [brochure]);
 
   function handleTagsChange(next: string[]) {
     setTags(next);
     setTagsDirty(true);
+  }
+
+  function handleCategoryChange(next: string) {
+    const value = next === "" ? null : next;
+    setCategory(value);
+    startCategoryTransition(async () => {
+      const saved = await updateBrochureCategory(brochure.id, value);
+      setCategory(saved);
+      onCategorySaved(saved);
+    });
   }
 
   function saveTags() {
@@ -267,9 +284,8 @@ export function ShareModal({
             Tags
           </label>
           <TagInput tags={tags} onChange={handleTagsChange} suggestions={allTags} />
-          <p className="font-sans-ui mt-1.5 mb-2 text-xs text-[var(--ink)]/50">
-            Only brochures sharing a tag appear in each other&apos;s &ldquo;Explore More&rdquo; —
-            useful for keeping regional pricing separate.
+          <p className="font-sans-ui mt-1.5 mb-2 shrink-0 truncate text-xs text-[var(--ink)]/50">
+            Shared tags control cross-sell in &ldquo;Explore More.&rdquo;
           </p>
           {tagsDirty && (
             <button
@@ -280,6 +296,32 @@ export function ShareModal({
               {isSavingTags ? "Saving tags…" : "Save tags"}
             </button>
           )}
+
+          <label
+            htmlFor="share-category"
+            className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
+          >
+            Website Category
+          </label>
+          <select
+            id="share-category"
+            value={category ?? ""}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            disabled={isSavingCategory}
+            className="font-sans-ui mb-1.5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-50"
+          >
+            <option value="">None</option>
+            {websiteCategories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <p className="font-sans-ui mb-3 shrink-0 truncate text-xs text-[var(--ink)]/50">
+            {isSavingCategory
+              ? "Saving…"
+              : "Adds an “Explore on our website” link on the brochure page."}
+          </p>
 
           <label
             htmlFor="share-message"
