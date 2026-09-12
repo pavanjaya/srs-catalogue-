@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getBrochureById, getBrochures, shareTag } from "@/lib/brochures";
+import { getBrochures, shareTag } from "@/lib/brochures";
 import { buildWebsiteLinkHref } from "@/lib/websiteLink";
 import { studio } from "@/lib/studio";
 import { FloatingContact } from "@/components/FloatingContact";
@@ -18,7 +18,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const brochure = await getBrochureById(id);
+  const all = await getBrochures();
+  const brochure = all.find((b) => b.id === id);
   if (!brochure) return {};
 
   const description = `A closer look at the ${brochure.title} collection, from ${studio.name}.`;
@@ -47,7 +48,8 @@ export default async function BrochurePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [brochure, all] = await Promise.all([getBrochureById(id), getBrochures()]);
+  const all = await getBrochures();
+  const brochure = all.find((b) => b.id === id);
   if (!brochure) notFound();
 
   const others = all.filter((b) => b.id !== id && shareTag(brochure.tags, b.tags)).slice(0, 8);

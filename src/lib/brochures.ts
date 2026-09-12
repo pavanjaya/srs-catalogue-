@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { list } from "@vercel/blob";
 import { encodeWebsiteLink, decodeWebsiteLink, type WebsiteLink } from "./websiteLink";
 
@@ -103,7 +104,14 @@ export function shareTag(a: string[], b: string[]): boolean {
   return a.some((t) => b.includes(t));
 }
 
-export async function getBrochures(): Promise<Brochure[]> {
+// Wrapped in React's cache() so every call within a single request — the
+// page body, generateMetadata, and getBrochureById's own internal call —
+// shares one execution instead of each re-running all 5 list() calls.
+// A single /brochure/[id] view used to cost 15 List operations this way
+// (metadata + page-body double-call); now it costs 5. Purely a
+// per-request memo, not a persistent cache — dynamic = "force-dynamic"
+// still guarantees a fresh read on every new request.
+export const getBrochures = cache(async (): Promise<Brochure[]> => {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
 
   const [pdfList, thumbList, tagsList, categoryList, typeList] = await Promise.all([
@@ -173,7 +181,7 @@ export async function getBrochures(): Promise<Brochure[]> {
   // Newest first.
   brochures.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
   return brochures;
-}
+});
 
 export async function getBrochureById(id: string): Promise<Brochure | null> {
   const all = await getBrochures();
