@@ -1,4 +1,5 @@
 import { list } from "@vercel/blob";
+import { encodeWebsiteLink, decodeWebsiteLink, type WebsiteLink } from "./websiteLink";
 
 // Server-only: reads BLOB_READ_WRITE_TOKEN, so this must only ever be
 // imported from Server Components / Server Actions / Route Handlers,
@@ -23,7 +24,7 @@ export type Brochure = {
   url: string;
   thumbnailUrl?: string;
   tags: string[];
-  websiteCategory: string | null;
+  websiteLink: WebsiteLink | null;
   uploadedAt: string; // ISO
 };
 
@@ -47,10 +48,11 @@ export function buildTagsPathname(id: string, tags: string[]): string {
   return `${TAGS_PREFIX}${id}--${encodeURIComponent(tags.join(","))}.json`;
 }
 
-// The main website's matching /products category, e.g. "Table Lights" —
-// stored the same pathname-encoding way as tags, but single-valued.
-export function buildCategoryPathname(id: string, category: string): string {
-  return `${CATEGORY_PREFIX}${id}--${encodeURIComponent(category)}.json`;
+// The brochure's matching spot on the main website — a /products category
+// or a /collections story — stored the same pathname-encoding way as
+// tags, but single-valued. See websiteLink.ts for the encoding.
+export function buildWebsiteLinkPathname(id: string, link: WebsiteLink): string {
+  return `${CATEGORY_PREFIX}${id}--${encodeWebsiteLink(link)}.json`;
 }
 
 // Trims, drops empties, and dedupes case-insensitively (keeping the first
@@ -109,16 +111,12 @@ export async function getBrochures(): Promise<Brochure[]> {
     }
   }
 
-  const categoryById = new Map<string, string>();
+  const websiteLinkById = new Map<string, WebsiteLink>();
   for (const blob of categoryList.blobs) {
     const match = blob.pathname.match(CATEGORY_RE);
     if (!match) continue;
-    try {
-      const decoded = decodeURIComponent(match[2]);
-      if (decoded) categoryById.set(match[1], decoded);
-    } catch {
-      continue;
-    }
+    const link = decodeWebsiteLink(match[2]);
+    if (link) websiteLinkById.set(match[1], link);
   }
 
   const brochures: Brochure[] = [];
@@ -137,7 +135,7 @@ export async function getBrochures(): Promise<Brochure[]> {
       url: blob.url,
       thumbnailUrl: thumbById.get(match[1]),
       tags: tagsById.get(match[1]) ?? [],
-      websiteCategory: categoryById.get(match[1]) ?? null,
+      websiteLink: websiteLinkById.get(match[1]) ?? null,
       uploadedAt: new Date(blob.uploadedAt).toISOString(),
     });
   }

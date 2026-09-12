@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { Brochure } from "@/lib/brochures";
+import type { WebsiteLink, WebsiteLinkOptions } from "@/lib/websiteLink";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
 import { ShareModal } from "@/components/ShareModal";
 
@@ -38,10 +39,10 @@ function formatDate(iso: string) {
 // brochure is a card — click it to share (or remove) via ShareModal.
 export function BrochureManager({
   initialBrochures,
-  websiteCategories,
+  websiteLinkOptions,
 }: {
   initialBrochures: Brochure[];
-  websiteCategories: string[];
+  websiteLinkOptions: WebsiteLinkOptions;
 }) {
   const [brochures, setBrochures] = useState(initialBrochures);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -70,9 +71,9 @@ export function BrochureManager({
     setShareTarget((prev) => (prev && prev.id === id ? { ...prev, tags } : prev));
   }
 
-  function handleCategorySaved(id: string, websiteCategory: string | null) {
-    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, websiteCategory } : b)));
-    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, websiteCategory } : prev));
+  function handleWebsiteLinkSaved(id: string, websiteLink: WebsiteLink | null) {
+    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, websiteLink } : b)));
+    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, websiteLink } : prev));
   }
 
   return (
@@ -149,7 +150,7 @@ export function BrochureManager({
       {uploadOpen && (
         <UploadBrochureModal
           allTags={allTags}
-          websiteCategories={websiteCategories}
+          websiteLinkOptions={websiteLinkOptions}
           onClose={() => setUploadOpen(false)}
           onUploaded={handleUploaded}
         />
@@ -158,11 +159,11 @@ export function BrochureManager({
         <ShareModal
           brochure={shareTarget}
           allTags={allTags}
-          websiteCategories={websiteCategories}
+          websiteLinkOptions={websiteLinkOptions}
           onClose={() => setShareTarget(null)}
           onDeleted={() => handleDeleted(shareTarget.id)}
           onTagsSaved={(tags) => handleTagsSaved(shareTarget.id, tags)}
-          onCategorySaved={(category) => handleCategorySaved(shareTarget.id, category)}
+          onWebsiteLinkSaved={(link) => handleWebsiteLinkSaved(shareTarget.id, link)}
         />
       )}
     </div>

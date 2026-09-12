@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import {
   buildThumbnailPathname,
   buildTagsPathname,
-  buildCategoryPathname,
+  buildWebsiteLinkPathname,
   normalizeTags,
   TAGS_PREFIX,
   CATEGORY_PREFIX,
 } from "@/lib/brochures";
-import { getWebsiteCategories } from "@/lib/websiteCategories";
+import { getWebsiteLinkOptions } from "@/lib/websiteCategories";
+import { parseWebsiteLinkSelection, type WebsiteLink } from "@/lib/websiteLink";
 
 // Deleting sends no file body, so it stays a normal Server Action — only
 // uploads need the client-upload route (src/app/api/brochures/upload),
@@ -57,19 +58,20 @@ export async function updateBrochureTags(id: string, rawTags: string[]): Promise
   return tags;
 }
 
-// Same pathname-encoding pattern as tags, but single-valued — pass null
-// (or an empty/unrecognized string) to clear it. Restricted to the fixed
-// list in lib/websiteCategories.ts rather than freeform, since this has
-// to exactly match a tab label on the main website to be useful.
-export async function updateBrochureCategory(id: string, category: string | null): Promise<string | null> {
-  const known = await getWebsiteCategories();
-  const valid = category && known.includes(category) ? category : null;
+// Same pathname-encoding pattern as tags, but single-valued — pass ""
+// to clear it. `rawSelection` is the <select>'s own "type|value" string;
+// it's re-resolved against the live category/story list here rather than
+// trusting whatever label the client sent, so a stale option can't get
+// saved with the wrong display text.
+export async function updateBrochureWebsiteLink(id: string, rawSelection: string): Promise<WebsiteLink | null> {
+  const options = await getWebsiteLinkOptions();
+  const link = parseWebsiteLinkSelection(rawSelection, options);
 
   const existing = await list({ prefix: `${CATEGORY_PREFIX}${id}--` });
   await Promise.all(existing.blobs.map((b) => del(b.pathname)));
 
-  if (valid) {
-    await put(buildCategoryPathname(id, valid), JSON.stringify({ category: valid }), {
+  if (link) {
+    await put(buildWebsiteLinkPathname(id, link), JSON.stringify(link), {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
@@ -78,5 +80,5 @@ export async function updateBrochureCategory(id: string, category: string | null
 
   revalidatePath("/");
   revalidatePath(`/brochure/${id}`);
-  return valid;
+  return link;
 }

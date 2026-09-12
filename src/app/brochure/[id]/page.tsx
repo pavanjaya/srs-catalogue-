@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getBrochureById, getBrochures, shareTag } from "@/lib/brochures";
+import { buildWebsiteLinkHref } from "@/lib/websiteLink";
 import { studio } from "@/lib/studio";
 import { FloatingContact } from "@/components/FloatingContact";
 import { PdfIcon } from "@/components/BrochureManager";
@@ -83,7 +84,7 @@ export default async function BrochurePage({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <a
             href={brochure.url}
             target="_blank"
@@ -92,14 +93,14 @@ export default async function BrochurePage({
           >
             View / Download Catalogue (PDF)
           </a>
-          {brochure.websiteCategory && (
+          {brochure.websiteLink && (
             <a
-              href={`${studio.website}/products?category=${encodeURIComponent(brochure.websiteCategory)}`}
+              href={buildWebsiteLinkHref(studio.website, brochure.websiteLink)}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-sans-ui inline-flex items-center justify-center gap-2 rounded-full border border-[var(--ink)] px-6 py-3 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white"
+              className="font-sans-ui text-sm font-medium text-[var(--ink)]/70 underline-offset-2 hover:text-[var(--ink)] hover:underline"
             >
-              Explore {brochure.websiteCategory} on Our Website
+              See more on website ↗
             </a>
           )}
         </div>

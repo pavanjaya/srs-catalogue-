@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
+import type { WebsiteLink, WebsiteLinkOptions } from "@/lib/websiteLink";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
 import { PdfIcon } from "@/components/BrochureManager";
 import { TagInput } from "@/components/TagInput";
-import { updateBrochureTags, updateBrochureCategory } from "@/app/actions/brochures";
+import { updateBrochureTags, updateBrochureWebsiteLink } from "@/app/actions/brochures";
 
 function UploadCloudIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
@@ -42,18 +43,18 @@ function formatSize(bytes: number) {
 // without a thumbnail, rather than blocking the whole upload on it.
 export function UploadBrochureModal({
   allTags,
-  websiteCategories,
+  websiteLinkOptions,
   onClose,
   onUploaded,
 }: {
   allTags: string[];
-  websiteCategories: string[];
+  websiteLinkOptions: WebsiteLinkOptions;
   onClose: () => void;
   onUploaded: (brochure: Brochure) => void;
 }) {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [category, setCategory] = useState("");
+  const [linkSelection, setLinkSelection] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
@@ -145,11 +146,11 @@ export function UploadBrochureModal({
         }
       }
 
-      let savedCategory: string | null = null;
-      if (category) {
+      let savedLink: WebsiteLink | null = null;
+      if (linkSelection) {
         try {
-          setStatusText("Saving category…");
-          savedCategory = await updateBrochureCategory(id, category);
+          setStatusText("Saving website link…");
+          savedLink = await updateBrochureWebsiteLink(id, linkSelection);
         } catch {
           // Non-fatal — can be set afterward from the share modal.
         }
@@ -161,7 +162,7 @@ export function UploadBrochureModal({
         url: blob.url,
         thumbnailUrl,
         tags: savedTags,
-        websiteCategory: savedCategory,
+        websiteLink: savedLink,
         uploadedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -213,7 +214,7 @@ export function UploadBrochureModal({
         />
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-          Tags <span className="normal-case text-[var(--ink)]/40">(optional — e.g. region or pricing)</span>
+          Tags <span className="normal-case tracking-normal text-[var(--ink)]/40">(optional — e.g. region or pricing)</span>
         </label>
         <div className="mb-5">
           <TagInput tags={tags} onChange={setTags} suggestions={allTags} />
@@ -223,22 +224,31 @@ export function UploadBrochureModal({
           htmlFor="brochure-category"
           className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
         >
-          Website Category{" "}
-          <span className="normal-case text-[var(--ink)]/40">(optional)</span>
+          Website Link{" "}
+          <span className="normal-case tracking-normal text-[var(--ink)]/40">(optional)</span>
         </label>
         <select
           id="brochure-category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          value={linkSelection}
+          onChange={(e) => setLinkSelection(e.target.value)}
           disabled={isBusy}
           className="font-sans-ui mb-5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
         >
           <option value="">None</option>
-          {websiteCategories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
+          <optgroup label="Product Category">
+            {websiteLinkOptions.categories.map((c) => (
+              <option key={c} value={`category|${c}`}>
+                {c}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Story">
+            {websiteLinkOptions.stories.map((s) => (
+              <option key={s.slug} value={`story|${s.slug}`}>
+                {s.title}
+              </option>
+            ))}
+          </optgroup>
         </select>
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">

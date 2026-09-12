@@ -1,8 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { studio } from "@/lib/studio";
 import { getBrochures } from "@/lib/brochures";
-import { getWebsiteCategories } from "@/lib/websiteCategories";
+import { getWebsiteLinkOptions } from "@/lib/websiteCategories";
 import { BrochureManager } from "@/components/BrochureManager";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ChangePasswordButton } from "@/components/ChangePasswordButton";
@@ -12,7 +11,7 @@ import { ChangePasswordButton } from "@/components/ChangePasswordButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const [brochures, websiteCategories] = await Promise.all([getBrochures(), getWebsiteCategories()]);
+  const [brochures, websiteLinkOptions] = await Promise.all([getBrochures(), getWebsiteLinkOptions()]);
 
   return (
     <>
@@ -23,13 +22,6 @@ export default async function AdminPage() {
           <span className="hidden sm:inline">SRS Catalogue Hub</span>
         </span>
         <div className="flex items-center gap-5">
-          <Link
-            href={studio.website}
-            target="_blank"
-            className="font-medium text-white/70 hover:text-white"
-          >
-            Visit full website ↗
-          </Link>
           <ChangePasswordButton />
           <LogoutButton />
         </div>
@@ -59,7 +51,7 @@ export default async function AdminPage() {
           </p>
         </header>
 
-        <BrochureManager initialBrochures={brochures} websiteCategories={websiteCategories} />
+        <BrochureManager initialBrochures={brochures} websiteLinkOptions={websiteLinkOptions} />
       </div>
     </>
   );

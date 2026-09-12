@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { deleteBrochure, updateBrochureTags, updateBrochureCategory } from "@/app/actions/brochures";
+import { deleteBrochure, updateBrochureTags, updateBrochureWebsiteLink } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
+import { selectValueFor, type WebsiteLink, type WebsiteLinkOptions } from "@/lib/websiteLink";
 import { PdfPreview } from "@/components/PdfPreview";
 import { TagInput } from "@/components/TagInput";
 
@@ -66,28 +67,41 @@ function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function ChevronIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // The admin panel's share popup for one brochure — left pane previews the
 // actual PDF (the browser's own viewer, which includes page number /
 // navigation), right pane has the link, editable message, Send via
 // WhatsApp / Email, and Remove (with an in-modal confirm step, not the
 // browser's own confirm() dialog). Opens from clicking a card in
 // BrochureManager.
+//
+// Tags and the website link live behind a collapsible "Organize" section
+// — collapsed by default once a brochure already has neither set, so the
+// share/message flow (this modal's actual job) stays visible without
+// scrolling in the fixed-height right pane.
 export function ShareModal({
   brochure,
   allTags,
-  websiteCategories,
+  websiteLinkOptions,
   onClose,
   onDeleted,
   onTagsSaved,
-  onCategorySaved,
+  onWebsiteLinkSaved,
 }: {
   brochure: Brochure;
   allTags: string[];
-  websiteCategories: string[];
+  websiteLinkOptions: WebsiteLinkOptions;
   onClose: () => void;
   onDeleted: () => void;
   onTagsSaved: (tags: string[]) => void;
-  onCategorySaved: (category: string | null) => void;
+  onWebsiteLinkSaved: (link: WebsiteLink | null) => void;
 }) {
   const [message, setMessage] = useState("");
   const [url, setUrl] = useState("");
@@ -98,8 +112,12 @@ export function ShareModal({
   const [tags, setTags] = useState<string[]>(brochure.tags);
   const [tagsDirty, setTagsDirty] = useState(false);
   const [isSavingTags, startTagsTransition] = useTransition();
-  const [category, setCategory] = useState<string | null>(brochure.websiteCategory);
-  const [isSavingCategory, startCategoryTransition] = useTransition();
+  const [linkSelection, setLinkSelection] = useState(selectValueFor(brochure.websiteLink));
+  const [websiteLink, setWebsiteLink] = useState<WebsiteLink | null>(brochure.websiteLink);
+  const [isSavingLink, startLinkTransition] = useTransition();
+  const [organizeOpen, setOrganizeOpen] = useState(
+    () => brochure.tags.length > 0 || !!brochure.websiteLink,
+  );
   const urlInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -116,22 +134,14 @@ export function ShareModal({
     setConfirmingRemove(false);
     setTags(brochure.tags);
     setTagsDirty(false);
-    setCategory(brochure.websiteCategory);
+    setLinkSelection(selectValueFor(brochure.websiteLink));
+    setWebsiteLink(brochure.websiteLink);
+    setOrganizeOpen(brochure.tags.length > 0 || !!brochure.websiteLink);
   }, [brochure]);
 
   function handleTagsChange(next: string[]) {
     setTags(next);
     setTagsDirty(true);
-  }
-
-  function handleCategoryChange(next: string) {
-    const value = next === "" ? null : next;
-    setCategory(value);
-    startCategoryTransition(async () => {
-      const saved = await updateBrochureCategory(brochure.id, value);
-      setCategory(saved);
-      onCategorySaved(saved);
-    });
   }
 
   function saveTags() {
@@ -141,6 +151,23 @@ export function ShareModal({
       setTagsDirty(false);
       onTagsSaved(saved);
     });
+  }
+
+  function handleLinkChange(next: string) {
+    setLinkSelection(next);
+    startLinkTransition(async () => {
+      const saved = await updateBrochureWebsiteLink(brochure.id, next);
+      setWebsiteLink(saved);
+      setLinkSelection(selectValueFor(saved));
+      onWebsiteLinkSaved(saved);
+    });
+  }
+
+  function organizeSummary(): string {
+    const parts: string[] = [];
+    if (tags.length > 0) parts.push(`${tags.length} tag${tags.length === 1 ? "" : "s"}`);
+    if (websiteLink) parts.push(websiteLink.label);
+    return parts.length > 0 ? parts.join(" · ") : "Tags, website link";
   }
 
   // Close on Escape — but not while the destructive confirm step is
@@ -280,48 +307,77 @@ export function ShareModal({
             </p>
           )}
 
-          <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
-            Tags
-          </label>
-          <TagInput tags={tags} onChange={handleTagsChange} suggestions={allTags} />
-          <p className="font-sans-ui mt-1.5 mb-2 shrink-0 truncate text-xs text-[var(--ink)]/50">
-            Shared tags control cross-sell in &ldquo;Explore More.&rdquo;
-          </p>
-          {tagsDirty && (
+          <div className="font-sans-ui mb-5 rounded-lg border border-[var(--line)]">
             <button
-              onClick={saveTags}
-              disabled={isSavingTags}
-              className="font-sans-ui mb-3 w-full rounded-full border border-[var(--ink)] px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white disabled:opacity-50"
+              type="button"
+              onClick={() => setOrganizeOpen((v) => !v)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
             >
-              {isSavingTags ? "Saving tags…" : "Save tags"}
+              <span className="shrink-0 text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+                Organize
+              </span>
+              <span className="flex min-w-0 items-center gap-1.5 text-xs text-[var(--ink)]/50">
+                <span className="truncate">{organizeSummary()}</span>
+                <ChevronIcon
+                  className={`h-3.5 w-3.5 shrink-0 transition-transform ${organizeOpen ? "rotate-180" : ""}`}
+                />
+              </span>
             </button>
-          )}
 
-          <label
-            htmlFor="share-category"
-            className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
-          >
-            Website Category
-          </label>
-          <select
-            id="share-category"
-            value={category ?? ""}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            disabled={isSavingCategory}
-            className="font-sans-ui mb-1.5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-50"
-          >
-            <option value="">None</option>
-            {websiteCategories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <p className="font-sans-ui mb-3 shrink-0 truncate text-xs text-[var(--ink)]/50">
-            {isSavingCategory
-              ? "Saving…"
-              : "Adds an “Explore on our website” link on the brochure page."}
-          </p>
+            {organizeOpen && (
+              <div className="border-t border-[var(--line)] p-4">
+                <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+                  Tags
+                </label>
+                <TagInput tags={tags} onChange={handleTagsChange} suggestions={allTags} />
+                <p className="mt-1.5 mb-2 shrink-0 truncate text-xs text-[var(--ink)]/50">
+                  Shared tags control cross-sell in &ldquo;Explore More.&rdquo;
+                </p>
+                {tagsDirty && (
+                  <button
+                    onClick={saveTags}
+                    disabled={isSavingTags}
+                    className="mb-4 w-full rounded-full border border-[var(--ink)] px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:bg-[var(--ink)] hover:text-white disabled:opacity-50"
+                  >
+                    {isSavingTags ? "Saving tags…" : "Save tags"}
+                  </button>
+                )}
+
+                <label
+                  htmlFor="share-website-link"
+                  className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
+                >
+                  Website Link
+                </label>
+                <select
+                  id="share-website-link"
+                  value={linkSelection}
+                  onChange={(e) => handleLinkChange(e.target.value)}
+                  disabled={isSavingLink}
+                  className="w-full rounded-lg border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-50"
+                >
+                  <option value="">None</option>
+                  <optgroup label="Product Category">
+                    {websiteLinkOptions.categories.map((c) => (
+                      <option key={c} value={`category|${c}`}>
+                        {c}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Story">
+                    {websiteLinkOptions.stories.map((s) => (
+                      <option key={s.slug} value={`story|${s.slug}`}>
+                        {s.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+                <p className="mt-1.5 shrink-0 truncate text-xs text-[var(--ink)]/50">
+                  {isSavingLink ? "Saving…" : "Adds an “Explore on our website” link."}
+                </p>
+              </div>
+            )}
+          </div>
 
           <label
             htmlFor="share-message"
