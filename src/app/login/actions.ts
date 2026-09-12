@@ -2,12 +2,13 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getAdminPassword } from "@/lib/adminPassword";
 
 export async function adminLogin(formData: FormData) {
   const password = formData.get("password");
   const next = (formData.get("next") as string) || "/";
 
-  if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+  if (!process.env.ADMIN_PASSWORD || password !== (await getAdminPassword())) {
     redirect(`/login?next=${encodeURIComponent(next)}&error=1`);
   }
 

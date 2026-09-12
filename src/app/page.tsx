@@ -4,6 +4,7 @@ import { studio } from "@/lib/studio";
 import { getBrochures } from "@/lib/brochures";
 import { BrochureManager } from "@/components/BrochureManager";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ChangePasswordButton } from "@/components/ChangePasswordButton";
 
 // Always fresh — the admin dashboard needs to show the current brochure
 // state immediately after an upload, not a stale cached snapshot.
@@ -27,6 +28,7 @@ export default async function AdminPage() {
           >
             Visit full website ↗
           </Link>
+          <ChangePasswordButton />
           <LogoutButton />
         </div>
       </div>

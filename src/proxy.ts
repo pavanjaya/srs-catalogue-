@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Always reachable, regardless of session — the admin login page and
-// static assets.
-const PUBLIC_PREFIXES = ["/login", "/brand/", "/fonts/", "/favicon"];
+// Always reachable, regardless of session — the admin login page, the
+// forgot/reset-password flow (has to work while logged out — that's the
+// whole point), and static assets.
+const PUBLIC_PREFIXES = [
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/brand/",
+  "/fonts/",
+  "/favicon",
+];
 
 // Client-facing routes (a brochure link a client actually opens) are
 // intentionally open — no PIN. Only the admin dashboard (root "/") and

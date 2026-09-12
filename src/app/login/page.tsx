@@ -1,13 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 import { studio } from "@/lib/studio";
 import { adminLogin } from "./actions";
 
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; reset?: string }>;
 }) {
-  const { next = "/", error } = await searchParams;
+  const { next = "/", error, reset } = await searchParams;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-[url('/brand/login-bg.jpg')] bg-cover bg-center px-6">
@@ -30,6 +31,11 @@ export default async function AdminLoginPage({
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
           Studio
         </p>
+        {reset === "success" && (
+          <p className="font-sans-ui mb-4 rounded-lg bg-[var(--footer-bg)] px-4 py-3 text-sm text-[var(--ink)]">
+            Password updated — log in with your new password.
+          </p>
+        )}
         <form action={adminLogin} className="w-full">
           <input type="hidden" name="next" value={next} />
           <label
@@ -57,6 +63,12 @@ export default async function AdminLoginPage({
             Enter
           </button>
         </form>
+        <Link
+          href="/forgot-password"
+          className="font-sans-ui mt-5 block text-center text-xs text-[var(--ink)]/50 hover:text-[var(--ink)]"
+        >
+          Forgot password?
+        </Link>
       </div>
     </div>
   );
