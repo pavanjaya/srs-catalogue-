@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Brochure } from "@/lib/brochures";
+import type { Brochure, CatalogueType } from "@/lib/brochures";
 import type { WebsiteLinkOptions } from "@/lib/websiteLink";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
 import { BrochureCard } from "@/components/BrochureCard";
@@ -16,10 +16,18 @@ function EmptyLibraryIcon({ className = "h-7 w-7" }: { className?: string }) {
   );
 }
 
-// The whole admin homepage: nothing until you upload something, then every
-// brochure is a card — click it to open its own share page at
-// /library/[id] (reviewing the PDF, writing the message, sending, tags,
-// website link, remove — all live there now, not in a modal).
+// "All" isn't a real tab — every brochure has exactly one type, so these
+// three always partition the library completely.
+const TABS: { type: CatalogueType; label: string }[] = [
+  { type: "product", label: "Product" },
+  { type: "story", label: "Story" },
+  { type: "general", label: "General" },
+];
+
+// The whole admin homepage: the heading, the "+ Upload Brochure" CTA, and
+// the library itself all live in one client component so the CTA can sit
+// next to the heading (not buried lower) while still sharing state with
+// the upload modal and the type tabs below it.
 export function BrochureManager({
   initialBrochures,
   websiteLinkOptions,
@@ -29,6 +37,11 @@ export function BrochureManager({
 }) {
   const [brochures, setBrochures] = useState(initialBrochures);
   const [uploadOpen, setUploadOpen] = useState(false);
+  // Every brochure uploaded before this field existed defaults to
+  // "general" (see getBrochures), so that's the tab most likely to have
+  // content on first load right now — starting there avoids landing on
+  // an empty "Product" tab.
+  const [activeTab, setActiveTab] = useState<CatalogueType>("general");
 
   // Every distinct tag already in use, for the tag-input's suggestions —
   // recomputed whenever the library changes.
@@ -38,9 +51,21 @@ export function BrochureManager({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [brochures]);
 
+  const countByType = useMemo(() => {
+    const counts: Record<CatalogueType, number> = { product: 0, story: 0, general: 0 };
+    for (const b of brochures) counts[b.catalogueType]++;
+    return counts;
+  }, [brochures]);
+
+  const visible = useMemo(
+    () => brochures.filter((b) => b.catalogueType === activeTab),
+    [brochures, activeTab],
+  );
+
   function handleUploaded(brochure: Brochure) {
     setBrochures((prev) => [brochure, ...prev]);
     setUploadOpen(false);
+    setActiveTab(brochure.catalogueType);
   }
 
   function handleDeleted(id: string) {
@@ -51,16 +76,20 @@ export function BrochureManager({
     setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, tags } : b)));
   }
 
+  function handleTypeSaved(id: string, catalogueType: CatalogueType) {
+    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, catalogueType } : b)));
+  }
+
   return (
     <div>
-      <div className="mb-8 flex items-baseline justify-between gap-4 border-t border-[var(--line)] pt-6">
-        <div className="flex items-baseline gap-3">
-          <h2 className="text-lg text-[var(--ink)]">Library</h2>
-          <span className="font-sans-ui text-xs text-[var(--ink)]/40">
-            {brochures.length === 0
-              ? "empty"
-              : `${brochures.length} catalogue${brochures.length === 1 ? "" : "s"}`}
-          </span>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="mb-2 max-w-xl text-2xl leading-tight text-[var(--ink)] sm:text-3xl">
+            Where every catalogue lives.
+          </h1>
+          <p className="font-sans-ui max-w-md text-[var(--ink)]/70">
+            Upload once — the link never changes, ready whenever a client asks.
+          </p>
         </div>
         <button
           onClick={() => setUploadOpen(true)}
@@ -70,30 +99,49 @@ export function BrochureManager({
         </button>
       </div>
 
-      {brochures.length === 0 ? (
+      <div className="font-sans-ui mb-8 flex gap-1 border-y border-[var(--line)] py-1">
+        {TABS.map(({ type, label }) => (
+          <button
+            key={type}
+            onClick={() => setActiveTab(type)}
+            className={`rounded-full px-4 py-2 text-sm transition ${
+              activeTab === type
+                ? "bg-[var(--ink)] text-white"
+                : "text-[var(--ink)]/60 hover:text-[var(--ink)]"
+            }`}
+          >
+            {label} <span className={activeTab === type ? "text-white/60" : "text-[var(--ink)]/40"}>{countByType[type]}</span>
+          </button>
+        ))}
+      </div>
+
+      {visible.length === 0 ? (
         <div className="flex flex-col items-center rounded-2xl border border-dashed border-[var(--line)] px-6 py-20 text-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--paper-2)]/70">
             <EmptyLibraryIcon className="h-7 w-7 text-[var(--ink)]/45" />
           </div>
           <p className="font-sans-ui mb-4 text-sm text-[var(--ink)]/50">
-            Nothing here yet — the first catalogue starts the library.
+            {brochures.length === 0
+              ? "Nothing here yet — the first catalogue starts the library."
+              : `No ${TABS.find((t) => t.type === activeTab)?.label.toLowerCase()} catalogues yet.`}
           </p>
           <button
             onClick={() => setUploadOpen(true)}
             className="font-sans-ui text-sm font-medium text-[var(--ink)] underline-offset-2 hover:underline"
           >
-            Upload your first brochure →
+            Upload {brochures.length === 0 ? "your first brochure" : "a brochure"} →
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {brochures.map((brochure) => (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((brochure) => (
             <BrochureCard
               key={brochure.id}
               brochure={brochure}
               allTags={allTags}
               onDeleted={handleDeleted}
               onTagsSaved={handleTagsSaved}
+              onTypeSaved={handleTypeSaved}
             />
           ))}
         </div>

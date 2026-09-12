@@ -6,9 +6,13 @@ import {
   buildThumbnailPathname,
   buildTagsPathname,
   buildWebsiteLinkPathname,
+  buildTypePathname,
   normalizeTags,
+  isCatalogueType,
   TAGS_PREFIX,
   CATEGORY_PREFIX,
+  TYPE_PREFIX,
+  type CatalogueType,
 } from "@/lib/brochures";
 import { getWebsiteLinkOptions } from "@/lib/websiteCategories";
 import { parseWebsiteLinkSelection, type WebsiteLink } from "@/lib/websiteLink";
@@ -21,17 +25,19 @@ export async function deleteBrochure(pdfPathname: string, id: string): Promise<v
     throw new Error("Invalid brochure.");
   }
   // del() doesn't error when a path doesn't exist, so it's safe to always
-  // try the thumbnail (and any tags/category blob) too even for brochures
-  // that never got one.
-  const [existingTags, existingCategory] = await Promise.all([
+  // try the thumbnail (and any tags/category/type blob) too even for
+  // brochures that never got one.
+  const [existingTags, existingCategory, existingType] = await Promise.all([
     list({ prefix: `${TAGS_PREFIX}${id}--` }),
     list({ prefix: `${CATEGORY_PREFIX}${id}--` }),
+    list({ prefix: `${TYPE_PREFIX}${id}--` }),
   ]);
   await Promise.all([
     del(pdfPathname),
     del(buildThumbnailPathname(id)),
     ...existingTags.blobs.map((b) => del(b.pathname)),
     ...existingCategory.blobs.map((b) => del(b.pathname)),
+    ...existingType.blobs.map((b) => del(b.pathname)),
   ]);
   revalidatePath("/");
 }
@@ -81,4 +87,24 @@ export async function updateBrochureWebsiteLink(id: string, rawSelection: string
   revalidatePath("/");
   revalidatePath(`/brochure/${id}`);
   return link;
+}
+
+// The admin library's own Product/Story/General split — always exactly
+// one value, unlike tags or the website link. Same delete-then-write
+// pathname pattern; falls back to "general" for anything invalid so this
+// can never leave a brochure without a type.
+export async function updateBrochureType(id: string, rawType: string): Promise<CatalogueType> {
+  const type: CatalogueType = isCatalogueType(rawType) ? rawType : "general";
+
+  const existing = await list({ prefix: `${TYPE_PREFIX}${id}--` });
+  await Promise.all(existing.blobs.map((b) => del(b.pathname)));
+
+  await put(buildTypePathname(id, type), JSON.stringify({ type }), {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+  });
+
+  revalidatePath("/");
+  return type;
 }

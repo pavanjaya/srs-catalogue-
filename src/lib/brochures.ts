@@ -18,6 +18,15 @@ import { encodeWebsiteLink, decodeWebsiteLink, type WebsiteLink } from "./websit
 // per-brochure fetch. Editing tags deletes the old pathname and writes a
 // new one (see updateBrochureTags in app/actions/brochures.ts), since the
 // tag list itself IS the pathname.
+// The admin library's own organizing split — completely independent of
+// Website Link. A brochure can be a Product-type catalogue with no
+// Website Link at all (not every product maps to a specific category
+// page), so this can never be derived from that field; it has to be its
+// own choice. "general" is the deliberate catch-all for anything that
+// isn't cleanly one or the other.
+export type CatalogueType = "product" | "story" | "general";
+const CATALOGUE_TYPES: CatalogueType[] = ["product", "story", "general"];
+
 export type Brochure = {
   id: string;
   title: string;
@@ -25,6 +34,7 @@ export type Brochure = {
   thumbnailUrl?: string;
   tags: string[];
   websiteLink: WebsiteLink | null;
+  catalogueType: CatalogueType;
   uploadedAt: string; // ISO
 };
 
@@ -32,9 +42,11 @@ const PDF_RE = /^brochures\/([a-zA-Z0-9_-]+)--(.+)\.pdf$/;
 const THUMB_RE = /^brochure-thumbs\/([a-zA-Z0-9_-]+)\.png$/;
 const TAGS_RE = /^brochure-tags\/([a-zA-Z0-9_-]+)--(.*)\.json$/;
 const CATEGORY_RE = /^brochure-category\/([a-zA-Z0-9_-]+)--(.*)\.json$/;
+const TYPE_RE = /^brochure-type\/([a-zA-Z0-9_-]+)--(product|story|general)\.json$/;
 
 export const TAGS_PREFIX = "brochure-tags/";
 export const CATEGORY_PREFIX = "brochure-category/";
+export const TYPE_PREFIX = "brochure-type/";
 
 export function buildBrochurePathname(id: string, title: string): string {
   return `brochures/${id}--${encodeURIComponent(title)}.pdf`;
@@ -53,6 +65,14 @@ export function buildTagsPathname(id: string, tags: string[]): string {
 // tags, but single-valued. See websiteLink.ts for the encoding.
 export function buildWebsiteLinkPathname(id: string, link: WebsiteLink): string {
   return `${CATEGORY_PREFIX}${id}--${encodeWebsiteLink(link)}.json`;
+}
+
+export function buildTypePathname(id: string, type: CatalogueType): string {
+  return `${TYPE_PREFIX}${id}--${type}.json`;
+}
+
+export function isCatalogueType(value: string): value is CatalogueType {
+  return (CATALOGUE_TYPES as string[]).includes(value);
 }
 
 // Trims, drops empties, and dedupes case-insensitively (keeping the first
@@ -86,11 +106,12 @@ export function shareTag(a: string[], b: string[]): boolean {
 export async function getBrochures(): Promise<Brochure[]> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
 
-  const [pdfList, thumbList, tagsList, categoryList] = await Promise.all([
+  const [pdfList, thumbList, tagsList, categoryList, typeList] = await Promise.all([
     list({ prefix: "brochures/", limit: 1000 }),
     list({ prefix: "brochure-thumbs/", limit: 1000 }),
     list({ prefix: TAGS_PREFIX, limit: 1000 }),
     list({ prefix: CATEGORY_PREFIX, limit: 1000 }),
+    list({ prefix: TYPE_PREFIX, limit: 1000 }),
   ]);
 
   const thumbById = new Map<string, string>();
@@ -119,6 +140,12 @@ export async function getBrochures(): Promise<Brochure[]> {
     if (link) websiteLinkById.set(match[1], link);
   }
 
+  const typeById = new Map<string, CatalogueType>();
+  for (const blob of typeList.blobs) {
+    const match = blob.pathname.match(TYPE_RE);
+    if (match) typeById.set(match[1], match[2] as CatalogueType);
+  }
+
   const brochures: Brochure[] = [];
   for (const blob of pdfList.blobs) {
     const match = blob.pathname.match(PDF_RE);
@@ -136,6 +163,9 @@ export async function getBrochures(): Promise<Brochure[]> {
       thumbnailUrl: thumbById.get(match[1]),
       tags: tagsById.get(match[1]) ?? [],
       websiteLink: websiteLinkById.get(match[1]) ?? null,
+      // Brochures uploaded before this field existed default to "general"
+      // rather than being lost from every tab.
+      catalogueType: typeById.get(match[1]) ?? "general",
       uploadedAt: new Date(blob.uploadedAt).toISOString(),
     });
   }

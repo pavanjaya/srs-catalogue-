@@ -2,12 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { buildBrochurePathname, buildThumbnailPathname, type Brochure } from "@/lib/brochures";
+import { buildBrochurePathname, buildThumbnailPathname, type Brochure, type CatalogueType } from "@/lib/brochures";
 import type { WebsiteLink, WebsiteLinkOptions } from "@/lib/websiteLink";
 import { renderFirstPageToPng } from "@/lib/pdfThumbnail";
 import { PdfIcon } from "@/components/PdfIcon";
 import { TagInput } from "@/components/TagInput";
-import { updateBrochureTags, updateBrochureWebsiteLink } from "@/app/actions/brochures";
+import { updateBrochureTags, updateBrochureWebsiteLink, updateBrochureType } from "@/app/actions/brochures";
+
+const CATALOGUE_TYPE_LABELS: Record<CatalogueType, string> = {
+  product: "Product",
+  story: "Story",
+  general: "General",
+};
 
 function UploadCloudIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
@@ -53,6 +59,7 @@ export function UploadBrochureModal({
   onUploaded: (brochure: Brochure) => void;
 }) {
   const [title, setTitle] = useState("");
+  const [catalogueType, setCatalogueType] = useState<CatalogueType | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [linkSelection, setLinkSelection] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -103,6 +110,10 @@ export function UploadBrochureModal({
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setError("Give the brochure a title.");
+      return;
+    }
+    if (!catalogueType) {
+      setError("Choose a catalogue type — Product, Story, or General.");
       return;
     }
     if (!linkSelection) {
@@ -158,6 +169,14 @@ export function UploadBrochureModal({
         // Non-fatal — the brochure still gets created.
       }
 
+      let savedType: CatalogueType = catalogueType;
+      try {
+        setStatusText("Saving catalogue type…");
+        savedType = await updateBrochureType(id, catalogueType);
+      } catch {
+        // Non-fatal — the brochure still gets created.
+      }
+
       onUploaded({
         id,
         title: trimmedTitle,
@@ -165,6 +184,7 @@ export function UploadBrochureModal({
         thumbnailUrl,
         tags: savedTags,
         websiteLink: savedLink,
+        catalogueType: savedType,
         uploadedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -214,6 +234,27 @@ export function UploadBrochureModal({
           disabled={isBusy}
           className="font-sans-ui mb-5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
         />
+
+        <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+          Catalogue Type
+        </label>
+        <div className="mb-5 grid grid-cols-3 gap-2">
+          {(Object.keys(CATALOGUE_TYPE_LABELS) as CatalogueType[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setCatalogueType(t)}
+              disabled={isBusy}
+              className={`font-sans-ui rounded-lg border px-4 py-2.5 text-sm font-medium transition disabled:opacity-60 ${
+                catalogueType === t
+                  ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                  : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
+              }`}
+            >
+              {CATALOGUE_TYPE_LABELS[t]}
+            </button>
+          ))}
+        </div>
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
           Tags <span className="normal-case tracking-normal text-[var(--ink)]/40">(optional — e.g. region or pricing)</span>

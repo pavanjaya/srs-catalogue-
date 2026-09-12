@@ -28,23 +28,15 @@ export default async function AdminPage() {
       </div>
 
       <div className="mx-auto max-w-[1320px] px-6 py-8 sm:px-14 sm:py-10">
-        <header className="mb-6">
-          <Image
-            src="/brand/srs-logo.png"
-            alt={studio.name}
-            width={1488}
-            height={366}
-            priority
-            unoptimized
-            className="mb-4 h-7 w-auto sm:h-8"
-          />
-          <h1 className="mb-2 max-w-xl text-2xl leading-tight sm:text-3xl">
-            Where every catalogue lives.
-          </h1>
-          <p className="font-sans-ui max-w-md text-[var(--ink)]/70">
-            Upload once — the link never changes, ready whenever a client asks.
-          </p>
-        </header>
+        <Image
+          src="/brand/srs-logo.png"
+          alt={studio.name}
+          width={1488}
+          height={366}
+          priority
+          unoptimized
+          className="mb-4 h-7 w-auto sm:h-8"
+        />
 
         <BrochureManager initialBrochures={brochures} websiteLinkOptions={websiteLinkOptions} />
       </div>

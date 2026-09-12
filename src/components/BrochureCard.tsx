@@ -1,13 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import type { Brochure } from "@/lib/brochures";
+import type { Brochure, CatalogueType } from "@/lib/brochures";
 import { buildBrochurePathname } from "@/lib/brochures";
-import { deleteBrochure, updateBrochureTags } from "@/app/actions/brochures";
+import { deleteBrochure, updateBrochureTags, updateBrochureType } from "@/app/actions/brochures";
 import { PdfIcon } from "@/components/PdfIcon";
 import { TagInput } from "@/components/TagInput";
+import { ShareModal } from "@/components/ShareModal";
+
+const CATALOGUE_TYPE_LABELS: Record<CatalogueType, string> = {
+  product: "Product",
+  story: "Story",
+  general: "General",
+};
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -38,25 +44,29 @@ function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-// One card in the library grid — the card itself is a Link to the full
-// share page; the "⋮" menu sits on top of the image for the quick admin
-// actions that moved off that page (tags, website link, delete), so they
-// stay reachable without leaving the grid.
+// One card in the library grid — clicking it opens the share popup; the
+// "⋮" menu sits on top of the image for tags, website link, and delete,
+// so those stay reachable without opening that popup at all.
 export function BrochureCard({
   brochure,
   allTags,
   onDeleted,
   onTagsSaved,
+  onTypeSaved,
 }: {
   brochure: Brochure;
   allTags: string[];
   onDeleted: (id: string) => void;
   onTagsSaved: (id: string, tags: string[]) => void;
+  onTypeSaved: (id: string, type: CatalogueType) => void;
 }) {
+  const [shareOpen, setShareOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tags, setTags] = useState(brochure.tags);
   const [tagsDirty, setTagsDirty] = useState(false);
   const [isSavingTags, startTagsTransition] = useTransition();
+  const [catalogueType, setCatalogueType] = useState(brochure.catalogueType);
+  const [isSavingType, startTypeTransition] = useTransition();
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -88,6 +98,15 @@ export function BrochureCard({
     });
   }
 
+  function changeType(next: CatalogueType) {
+    setCatalogueType(next);
+    startTypeTransition(async () => {
+      const saved = await updateBrochureType(brochure.id, next);
+      setCatalogueType(saved);
+      onTypeSaved(brochure.id, saved);
+    });
+  }
+
   function confirmRemove() {
     startDeleteTransition(async () => {
       await deleteBrochure(buildBrochurePathname(brochure.id, brochure.title), brochure.id);
@@ -97,7 +116,7 @@ export function BrochureCard({
 
   return (
     <div className="group relative">
-      <Link href={`/library/${brochure.id}`} className="block text-left">
+      <button type="button" onClick={() => setShareOpen(true)} className="block w-full text-left">
         <div className="relative mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
           {brochure.thumbnailUrl ? (
             <Image
@@ -127,7 +146,18 @@ export function BrochureCard({
         </div>
         <p className="font-sans-ui truncate text-lg text-[var(--ink)]">{brochure.title}</p>
         <p className="font-sans-ui text-xs font-medium text-[var(--ink)]/50">{formatDate(brochure.uploadedAt)}</p>
-      </Link>
+      </button>
+
+      {shareOpen && (
+        <ShareModal
+          brochure={brochure}
+          onClose={() => setShareOpen(false)}
+          onDeleted={() => {
+            setShareOpen(false);
+            onDeleted(brochure.id);
+          }}
+        />
+      )}
 
       <div ref={menuRef} className="absolute top-2 right-2">
         <button
@@ -151,6 +181,27 @@ export function BrochureCard({
             }}
             className="font-sans-ui absolute top-full right-0 z-20 mt-2 w-72 rounded-xl border border-[var(--line)] bg-[var(--paper)] p-4 text-left shadow-2xl"
           >
+            <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
+              Catalogue Type
+            </label>
+            <div className="mb-4 grid grid-cols-3 gap-1.5">
+              {(Object.keys(CATALOGUE_TYPE_LABELS) as CatalogueType[]).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => changeType(t)}
+                  disabled={isSavingType}
+                  className={`rounded-lg border px-2 py-2 text-xs font-medium transition disabled:opacity-60 ${
+                    catalogueType === t
+                      ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                      : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
+                  }`}
+                >
+                  {CATALOGUE_TYPE_LABELS[t]}
+                </button>
+              ))}
+            </div>
+
             <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
               Tags
             </label>
