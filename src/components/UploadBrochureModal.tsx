@@ -105,6 +105,10 @@ export function UploadBrochureModal({
       setError("Give the brochure a title.");
       return;
     }
+    if (!linkSelection) {
+      setError("Choose a website link — or “No Website Link” if it doesn't apply.");
+      return;
+    }
     if (!file) {
       setError("Choose a PDF file.");
       return;
@@ -147,13 +151,11 @@ export function UploadBrochureModal({
       }
 
       let savedLink: WebsiteLink | null = null;
-      if (linkSelection) {
-        try {
-          setStatusText("Saving website link…");
-          savedLink = await updateBrochureWebsiteLink(id, linkSelection);
-        } catch {
-          // Non-fatal — can be set afterward from the share modal.
-        }
+      try {
+        setStatusText("Saving website link…");
+        savedLink = await updateBrochureWebsiteLink(id, linkSelection);
+      } catch {
+        // Non-fatal — the brochure still gets created.
       }
 
       onUploaded({
@@ -224,32 +226,45 @@ export function UploadBrochureModal({
           htmlFor="brochure-category"
           className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
         >
-          Website Link{" "}
-          <span className="normal-case tracking-normal text-[var(--ink)]/40">(optional)</span>
+          Website Link
         </label>
-        <select
-          id="brochure-category"
-          value={linkSelection}
-          onChange={(e) => setLinkSelection(e.target.value)}
-          disabled={isBusy}
-          className="font-sans-ui mb-5 w-full rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
-        >
-          <option value="">None</option>
-          <optgroup label="Product Category">
-            {websiteLinkOptions.categories.map((c) => (
-              <option key={c} value={`category|${c}`}>
-                {c}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Story">
-            {websiteLinkOptions.stories.map((s) => (
-              <option key={s.slug} value={`story|${s.slug}`}>
-                {s.title}
-              </option>
-            ))}
-          </optgroup>
-        </select>
+        <div className="relative mb-5">
+          <select
+            id="brochure-category"
+            value={linkSelection}
+            onChange={(e) => setLinkSelection(e.target.value)}
+            disabled={isBusy}
+            required
+            className="font-sans-ui w-full appearance-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 pr-10 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-60"
+          >
+            <option value="" disabled>
+              Choose a website link…
+            </option>
+            <option value="_none_">No Website Link</option>
+            <optgroup label="Product Category">
+              {websiteLinkOptions.categories.map((c) => (
+                <option key={c} value={`category|${c}`}>
+                  {c}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Story">
+              {websiteLinkOptions.stories.map((s) => (
+                <option key={s.slug} value={`story|${s.slug}`}>
+                  {s.title}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[var(--ink)]/50"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
 
         <label className="font-sans-ui mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
           PDF File

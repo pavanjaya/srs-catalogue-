@@ -4,9 +4,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { WhatsAppIcon, EmailIcon } from "@/components/ConnectIcons";
-import { deleteBrochure, updateBrochureTags, updateBrochureWebsiteLink } from "@/app/actions/brochures";
+import { deleteBrochure, updateBrochureTags } from "@/app/actions/brochures";
 import { buildBrochurePathname, type Brochure } from "@/lib/brochures";
-import { selectValueFor, type WebsiteLink, type WebsiteLinkOptions } from "@/lib/websiteLink";
 import { PdfPreview } from "@/components/PdfPreview";
 import { TagInput } from "@/components/TagInput";
 
@@ -86,11 +85,9 @@ function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
 export function BrochureSharePage({
   brochure,
   allTags,
-  websiteLinkOptions,
 }: {
   brochure: Brochure;
   allTags: string[];
-  websiteLinkOptions: WebsiteLinkOptions;
 }) {
   const router = useRouter();
   const [message, setMessage] = useState(
@@ -104,9 +101,6 @@ export function BrochureSharePage({
   const [tags, setTags] = useState<string[]>(brochure.tags);
   const [tagsDirty, setTagsDirty] = useState(false);
   const [isSavingTags, startTagsTransition] = useTransition();
-  const [linkSelection, setLinkSelection] = useState(selectValueFor(brochure.websiteLink));
-  const [websiteLink, setWebsiteLink] = useState<WebsiteLink | null>(brochure.websiteLink);
-  const [isSavingLink, startLinkTransition] = useTransition();
   const [organizeOpen, setOrganizeOpen] = useState(
     () => brochure.tags.length > 0 || !!brochure.websiteLink,
   );
@@ -138,19 +132,10 @@ export function BrochureSharePage({
     });
   }
 
-  function handleLinkChange(next: string) {
-    setLinkSelection(next);
-    startLinkTransition(async () => {
-      const saved = await updateBrochureWebsiteLink(brochure.id, next);
-      setWebsiteLink(saved);
-      setLinkSelection(selectValueFor(saved));
-    });
-  }
-
   function organizeSummary(): string {
     const parts: string[] = [];
     if (tags.length > 0) parts.push(`${tags.length} tag${tags.length === 1 ? "" : "s"}`);
-    if (websiteLink) parts.push(websiteLink.label);
+    if (brochure.websiteLink) parts.push(brochure.websiteLink.label);
     return parts.length > 0 ? parts.join(" · ") : "Tags, website link";
   }
 
@@ -289,37 +274,14 @@ export function BrochureSharePage({
                   </button>
                 )}
 
-                <label
-                  htmlFor="share-website-link"
-                  className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase"
-                >
+                <label className="mb-2 block text-xs tracking-[0.2em] text-[var(--ash)] uppercase">
                   Website Link
                 </label>
-                <select
-                  id="share-website-link"
-                  value={linkSelection}
-                  onChange={(e) => handleLinkChange(e.target.value)}
-                  disabled={isSavingLink}
-                  className="w-full rounded-lg border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)] disabled:opacity-50"
-                >
-                  <option value="">None</option>
-                  <optgroup label="Product Category">
-                    {websiteLinkOptions.categories.map((c) => (
-                      <option key={c} value={`category|${c}`}>
-                        {c}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Story">
-                    {websiteLinkOptions.stories.map((s) => (
-                      <option key={s.slug} value={`story|${s.slug}`}>
-                        {s.title}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-                <p className="mt-1.5 shrink-0 truncate text-xs text-[var(--ink)]/50">
-                  {isSavingLink ? "Saving…" : "Adds an “Explore on our website” link."}
+                <p className="text-sm text-[var(--ink)]">
+                  {brochure.websiteLink ? brochure.websiteLink.label : "No Website Link"}
+                </p>
+                <p className="mt-1.5 shrink-0 text-xs text-[var(--ink)]/50">
+                  Set at upload — not editable here.
                 </p>
               </div>
             )}
