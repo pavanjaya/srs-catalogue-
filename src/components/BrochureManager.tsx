@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Brochure } from "@/lib/brochures";
-import type { WebsiteLink, WebsiteLinkOptions } from "@/lib/websiteLink";
+import type { WebsiteLinkOptions } from "@/lib/websiteLink";
 import { UploadBrochureModal } from "@/components/UploadBrochureModal";
-import { ShareModal } from "@/components/ShareModal";
 
 export function PdfIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -36,7 +36,9 @@ function formatDate(iso: string) {
 }
 
 // The whole admin homepage: nothing until you upload something, then every
-// brochure is a card — click it to share (or remove) via ShareModal.
+// brochure is a card — click it to open its own share page at
+// /library/[id] (reviewing the PDF, writing the message, sending, tags,
+// website link, remove — all live there now, not in a modal).
 export function BrochureManager({
   initialBrochures,
   websiteLinkOptions,
@@ -46,7 +48,6 @@ export function BrochureManager({
 }) {
   const [brochures, setBrochures] = useState(initialBrochures);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [shareTarget, setShareTarget] = useState<Brochure | null>(null);
 
   // Every distinct tag already in use, for the tag-input's suggestions —
   // recomputed whenever the library changes.
@@ -59,21 +60,6 @@ export function BrochureManager({
   function handleUploaded(brochure: Brochure) {
     setBrochures((prev) => [brochure, ...prev]);
     setUploadOpen(false);
-  }
-
-  function handleDeleted(id: string) {
-    setBrochures((prev) => prev.filter((b) => b.id !== id));
-    setShareTarget(null);
-  }
-
-  function handleTagsSaved(id: string, tags: string[]) {
-    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, tags } : b)));
-    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, tags } : prev));
-  }
-
-  function handleWebsiteLinkSaved(id: string, websiteLink: WebsiteLink | null) {
-    setBrochures((prev) => prev.map((b) => (b.id === id ? { ...b, websiteLink } : b)));
-    setShareTarget((prev) => (prev && prev.id === id ? { ...prev, websiteLink } : prev));
   }
 
   return (
@@ -113,7 +99,7 @@ export function BrochureManager({
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {brochures.map((brochure) => (
-            <button key={brochure.id} onClick={() => setShareTarget(brochure)} className="group text-left">
+            <Link key={brochure.id} href={`/library/${brochure.id}`} className="group block text-left">
               <div className="mb-2 flex aspect-[297/210] items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white">
                 {brochure.thumbnailUrl ? (
                   <Image
@@ -142,7 +128,7 @@ export function BrochureManager({
                   ))}
                 </p>
               )}
-            </button>
+            </Link>
           ))}
         </div>
       )}
@@ -153,17 +139,6 @@ export function BrochureManager({
           websiteLinkOptions={websiteLinkOptions}
           onClose={() => setUploadOpen(false)}
           onUploaded={handleUploaded}
-        />
-      )}
-      {shareTarget && (
-        <ShareModal
-          brochure={shareTarget}
-          allTags={allTags}
-          websiteLinkOptions={websiteLinkOptions}
-          onClose={() => setShareTarget(null)}
-          onDeleted={() => handleDeleted(shareTarget.id)}
-          onTagsSaved={(tags) => handleTagsSaved(shareTarget.id, tags)}
-          onWebsiteLinkSaved={(link) => handleWebsiteLinkSaved(shareTarget.id, link)}
         />
       )}
     </div>
