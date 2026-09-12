@@ -36,6 +36,20 @@ function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function LinkIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M9.5 14.5 14.5 9.5M11 7.5l1.4-1.4a3.5 3.5 0 0 1 5 5L16 12.5M13 16.5l-1.4 1.4a3.5 3.5 0 0 1-5-5L8 11.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -77,8 +91,12 @@ export function ShareModal({
   useEffect(() => {
     const fullUrl = `${window.location.origin}/brochure/${brochure.id}`;
     setUrl(fullUrl);
+    // The link itself is deliberately not part of this editable text — it's
+    // appended from the locked `url` state at send time (see sendWhatsApp /
+    // sendEmail below), so editing the message can never accidentally strip
+    // the link out of what gets sent.
     setMessage(
-      `Hi, here's the catalogue for ${brochure.title} 👇\n${fullUrl}\nTake a look — view or download anytime.`,
+      `Hi, sharing the ${brochure.title} catalogue from Shailesh Rajput Studio.\n\nTake a look whenever suits you — happy to talk through any piece that catches your eye.`,
     );
     setCopied(false);
     setConfirmingRemove(false);
@@ -123,13 +141,19 @@ export function ShareModal({
     setTimeout(() => setCopyFailed(false), 3000);
   }
 
+  // Always the editable text plus the locked link, in that order — never
+  // just `message` alone, so there's no way to send without the link.
+  function fullMessage() {
+    return `${message}\n\n${url}`;
+  }
+
   function sendWhatsApp() {
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+    window.open(`https://wa.me/?text=${encodeURIComponent(fullMessage())}`, "_blank");
   }
 
   function sendEmail() {
     window.open(
-      `mailto:?subject=${encodeURIComponent(brochure.title)}&body=${encodeURIComponent(message)}`,
+      `mailto:?subject=${encodeURIComponent(brochure.title)}&body=${encodeURIComponent(fullMessage())}`,
       "_blank",
     );
   }
@@ -225,8 +249,17 @@ export function ShareModal({
             id="share-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="font-sans-ui mb-5 min-h-[140px] w-full flex-1 resize-none rounded-lg border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+            className="font-sans-ui min-h-[140px] w-full flex-1 resize-none rounded-t-lg border border-b-0 border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]"
           />
+          {/* The link itself, shown locked onto the bottom of the message box
+              rather than left editable inside it — so it's obviously part of
+              what gets sent, but can't be deleted by whoever's editing the
+              text above it. */}
+          <div className="font-sans-ui mb-5 flex items-center gap-2 rounded-b-lg border border-[var(--line)] bg-[var(--paper-2)]/60 px-4 py-2.5 text-xs text-[var(--ink)]/60">
+            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{url}</span>
+            <span className="ml-auto shrink-0 text-[var(--ink)]/40">Always included</span>
+          </div>
 
           <div className="font-sans-ui mb-6 grid grid-cols-2 gap-3">
             <button
